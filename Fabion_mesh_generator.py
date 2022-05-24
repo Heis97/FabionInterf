@@ -82,15 +82,15 @@ class G88(BufferFrame):
 
 
 class BufferProgramm:
-    frames :list[BufferFrame]
+    frames :"list[BufferFrame]"
     current_layer:int
     corner:int #0 - rightup, 1 - leftdown
     axis:int
 
-    def __init__(self, frames:list[BufferFrame]):
+    def __init__(self, frames:"list[BufferFrame]"):
         self.frames = frames
 
-    def addFrames(self,prog2:list[BufferFrame]):
+    def addFrames(self,prog2:"list[BufferFrame]"):
         self.frames.extend(prog2)
 
     def generate_mesh(self,nx: int,ny: int,d: float,dz: float,nz: int,start_z:float):
@@ -752,12 +752,15 @@ class ex11(QtWidgets.QWidget):
         # отображался как самостоятельное окно указываем тип окна
         super().__init__(parent, QtCore.Qt.Window)
         self.setWindowTitle("Создание решётки")
-        self.resize(1000, 700)   
+        self.resize(1200, 700)   
         print("1")
         self.koord_1 = []
+
+        self.koord_2p5d = []
         self.koord_sph = []
         
         self.build()
+
     def build(self):
         self.but_gen_mesh = QtWidgets.QPushButton('Генерировать решётку', self)
         self.but_gen_mesh.setGeometry(QtCore.QRect(30, 20, 150, 40))
@@ -909,48 +912,53 @@ class ex11(QtWidgets.QWidget):
         qp.setRenderHint(QPainter.Antialiasing)
         self.drawLines(qp)
 
-        #qp.restore()
+    def pointTo25D(self,x:float,y:float,z:float)->"tuple[float,float]":
+        x2d:float = 1.732*x-1.732*y
+        y2d:float = x + y + 2*z
+        return x2d,y2d
+
+    def koords3dTo25D(self,koords:list)->list:
+        koords2d = []
+        for i in range(len(koords)):
+            x,y = self.pointTo25D(koords[i][0],koords[i][1],koords[i][2])
+            koords2d.append([x,y])
+        return koords2d
     def drawLines(self, qp):
         pen = QPen(Qt.blue, 1, Qt.SolidLine)
         qp.setPen(pen)
         #print(str(self.koord_2))
+        paint_koords = self.koords3dTo25D(self.koord_1)
         Xmin=10000
         Ymin=10000
         Xmax=-10000
         Ymax=-10000
         Xq1=400
-        Xq2=600
+        Xq2= Xq1+600
         Yq1=20
-        Yq2=400
-        if len(self.koord_1)==0:
+        Yq2=Yq1+600
+        if len(paint_koords)==0:
             return
-        for i in range(len(self.koord_1)-1):            
-            if self.koord_1[i][0]>Xmax:
-                Xmax=self.koord_1[i][0]
-            if self.koord_1[i][0]<Xmin:
-                Xmin=self.koord_1[i][0]
-            if self.koord_1[i][1]>Ymax:
-                Ymax=self.koord_1[i][1]
-            if self.koord_1[i][1]<Ymin:
-                Ymin=self.koord_1[i][1]
+        for i in range(len(paint_koords)-1):            
+            if paint_koords[i][0]>Xmax:
+                Xmax=paint_koords[i][0]
+            if paint_koords[i][0]<Xmin:
+                Xmin=paint_koords[i][0]
+            if paint_koords[i][1]>Ymax:
+                Ymax=paint_koords[i][1]
+            if paint_koords[i][1]<Ymin:
+                Ymin=paint_koords[i][1]
         k=abs(Xq1-Xq2)/abs(Xmax-Xmin)  
-        P4x=Xmin+(Xmax-Xmin)/2
-        P4y=Ymax
+
         offX=Xmin*k-Xq1
         offY=Ymin*k-Yq1
-        for i in range(int(len(self.koord_1))-1):
-            if(self.koord_1[i+1][3]==0):
-                pen = QPen(Qt.blue, 1, Qt.SolidLine)
-                qp.setPen(pen)
-            if(self.koord_1[i+1][3]==1):
-                pen = QPen(Qt.red , 1, Qt.SolidLine)
-                qp.setPen(pen)
-            x1=self.koord_1[i][0]
-            y1=self.koord_1[i][1]
-            x2=self.koord_1[i+1][0]
-            y2=self.koord_1[i+1][1]
+        pen = QPen(Qt.blue, 1, Qt.SolidLine)
+        qp.setPen(pen)
+        for i in range(int(len(paint_koords))-1):   
+            x1=paint_koords[i][0]
+            y1=paint_koords[i][1]
+            x2=paint_koords[i+1][0]
+            y2=paint_koords[i+1][1]
             qp.drawLine(int(x1*k-offX),int(y1*k-offY),int(x2*k-offX),int(y2*k-offY))
-            #print(str(self.koord_1[i][0]*k-offX))
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
