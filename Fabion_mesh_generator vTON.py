@@ -420,7 +420,7 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
         y = tr[i][1]
         z = tr[i][2]
         if(i==0):
-            f1.write('N'+str(N)+' G11 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+3,4))+  ' D'+str(ndoz)+'\n')
+            f1.write('N'+str(N)+' G11 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+10,4))+  ' D'+str(ndoz)+'\n')
             N+=5
             f1.write('N'+str(N)+' G11 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z,4))+  ' D'+str(ndoz)+'\n')
             N+=5
@@ -436,15 +436,15 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
             f1.write('N'+str(N)+' G88 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z,4))+ ' F'+str(round(F,4))+ ' V'+str(round(v,4))+  ' D'+str(ndoz)+' Q0 T1 I0 J0 \n')
             N+=5
         if(i==len(tr)-1):
-            f1.write('N'+str(N)+' G11 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+3,4))+  ' D'+str(ndoz)+'\n')
+            f1.write('N'+str(N)+' G11 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+10,4))+  ' D'+str(ndoz)+'\n')
             N+=5
 
     f1.close()  
 
-def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float):
+def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int):
     f1=open(name,'w')
     F = F*60
-    v_all = startE
+    v_all = 0.05
     
     for i in range(len(tr)):
         x = tr[i][0]
@@ -453,6 +453,9 @@ def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, nd
         if(i==0):
             f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+10,4))+'\n')
             f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z,4))+  '\n')
+            f1.write('G1 E0.05\n')
+            #f1.write('N'+str(N)+' G87 P2 P3 P0\n')
+            #f1.write('N'+str(N)+' G87 P0 P'+str(ndoz)+' P0.1\n')
         else:
             x_ = tr[i-1][0]
             y_ = tr[i-1][1]
@@ -467,7 +470,7 @@ def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, nd
 
             f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+10,4))+ '\n')
 
-    f1.write(";Volume: "+str(0.058*(v_all-startE))+"cm2"+'\n')    
+    f1.write(";Volume: "+str(0.058*v_all)+"cm2"+'\n')    
     f1.close()  
 
 
@@ -795,15 +798,18 @@ class ex11(QtWidgets.QWidget):
 
         self.lin_nx = QtWidgets.QLineEdit(self)
         self.lin_nx.setGeometry(QtCore.QRect(30, 70, 120, 20))#nx
+        vNx = 4;
         self.lin_nx.setText('4')
 
         self.lin_ny = QtWidgets.QLineEdit(self)
         self.lin_ny.setGeometry(QtCore.QRect(30, 100, 120, 20))#ny
+        vNy = 4;
         self.lin_ny.setText('4')
 
         self.lin_d = QtWidgets.QLineEdit(self)
         self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
-        self.lin_d.setText('1.2')
+        vd = 4;
+        self.lin_d.setText('4')
 
         self.lin_dz = QtWidgets.QLineEdit(self)
         self.lin_dz.setGeometry(QtCore.QRect(30, 160, 120, 20))#dZ
@@ -829,14 +835,15 @@ class ex11(QtWidgets.QWidget):
         self.lin_startz.setGeometry(QtCore.QRect(30, 310, 120, 20))#startz
         self.lin_startz.setText('0')
 
-        self.lin_startE = QtWidgets.QLineEdit(self)
-        self.lin_startE.setGeometry(QtCore.QRect(30, 340, 120, 20))#startz
-        self.lin_startE.setText('0')
+        self.lin_name = QtWidgets.QLineEdit(self)
+        self.lin_name.setGeometry(QtCore.QRect(30, 370, 300, 20))#name
+        vS = 'c:\Intel\Yad\mesh'+str(vNx)+'x'+str(vNy)+'x'+str(vd)+'.txt'
+        self.lin_name.setText(vS)
 
         self.lin_name = QtWidgets.QLineEdit(self)
-        self.lin_name.setGeometry(QtCore.QRect(30, 400, 300, 20))#name
-        self.lin_name.setText('g_new_mesh.txt')
-        
+        self.lin_name.setGeometry(QtCore.QRect(30, 410, 300, 20))#comment
+        self.lin_name.setText('; Комментарий...Sorry didt see away.')
+
         #----------------------------------------------
 
         self.label_nx = QtWidgets.QLabel('Nx',self)
@@ -874,12 +881,8 @@ class ex11(QtWidgets.QWidget):
         self.label_nx.setGeometry(QtCore.QRect(160, 310, 60, 20))
         self.label_nx.setText('startz')
 
-        self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 340, 60, 20))
-        self.label_nx.setText('startE')
-
         self.label_name = QtWidgets.QLabel(self)
-        self.label_name.setGeometry(QtCore.QRect(160, 375, 60, 20))
+        self.label_name.setGeometry(QtCore.QRect(160, 345, 60, 20))
         self.label_name.setText('Name')
 
     def gen_mesh(self):
@@ -887,7 +890,7 @@ class ex11(QtWidgets.QWidget):
             self.koord_1 = generate_mesh(int(self.lin_nx.text()),int(self.lin_ny.text()),float(self.lin_d.text()),float(self.lin_dz.text()),int(self.lin_nz.text()),float(self.lin_startz.text()))
             self.update()
         except BaseException:
-            print("Cannot generate mesh")
+            pass
     def gen_layer(self):
         try:
             tr =  []
@@ -900,7 +903,7 @@ class ex11(QtWidgets.QWidget):
                 )
             self.update()
         except BaseException:
-            print("Cannot generate layer")
+            pass
     def gen_spher(self):
         try:
             tr =  []
@@ -912,17 +915,10 @@ class ex11(QtWidgets.QWidget):
         try:
             #self.koord_1 = generate_mesh(int(self.lin_nx.text()),int(self.lin_ny.text()),float(self.lin_d.text()),float(self.lin_dz.text()),int(self.lin_nz.text()))
             #generate_file(self.koord_1,self.lin_name.text(),float(self.lin_F.text()),float(self.lin_diam.text()),float(self.lin_dz.text()),float(self.lin_ndoz.text()))
-            generate_fileGcode(
-                self.koord_1,
-                self.lin_name.text(),
-                float(self.lin_F.text()),
-                float(self.lin_diam.text()),
-                float(self.lin_dz.text()),
-                float(self.lin_ndoz.text()),
-                float(self.lin_startE.text()))
+            generate_fileGcode(self.koord_1,self.lin_name.text(),float(self.lin_F.text()),float(self.lin_diam.text()),float(self.lin_dz.text()),float(self.lin_ndoz.text()))
             self.update()
         except BaseException:
-            print("Cannot generate file")
+            pass
     def gen_file_1(self):
         try:
             #self.koord_1 = generate_mesh(int(self.lin_nx.text()),int(self.lin_ny.text()),float(self.lin_d.text()),float(self.lin_dz.text()),int(self.lin_nz.text()))
