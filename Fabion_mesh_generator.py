@@ -411,7 +411,6 @@ class BufferProgramm:
 
         f1.close()                     
 
-
 def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int):
     f1=open(name,'w')
     N = 5
@@ -444,31 +443,38 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
 def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float):
     f1=open(name,'w')
     F = F*60
+    Diam_syr = 8.6
+    cur_z= ' Z'
+    safe_z = 50
+    if ndoz==1:
+        cur_z = ' A'
+    elif ndoz==2:
+        cur_z = ' B'
     v_all = startE
-    
+    f1.write(';'+name+' F'+str(round(F,4))+'\n; diam'+str(round(diam,4))+'\n; dz'+str(round(dz,4))+'\n; ndoz'+str(round(ndoz,4))+'\n; startE'+str(round(startE,4))+'\n')
+    f1.write('T'+str(ndoz))
     for i in range(len(tr)):
         x = tr[i][0]
         y = tr[i][1]
         z = tr[i][2]
         if(i==0):
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+10,4))+'\n')
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z,4))+  '\n')
+            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+'\n')
+            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+  '\n')
         else:
             x_ = tr[i-1][0]
             y_ = tr[i-1][1]
             z_ = tr[i-1][2] 
             rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
-            k = 0.00513152
-            v = diam*dz*rasst
-            v= k*rasst
+            v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
             v_all+=v
-            f1.write('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+' Z'+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
+            f1.write('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
         if(i==len(tr)-1):
 
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+10,4))+ '\n')
+            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
 
     f1.write(";Volume: "+str(0.058*(v_all-startE))+"cm2"+'\n')    
     f1.close()  
+
 
 
 def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int):
@@ -507,8 +513,7 @@ def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndo
 
 
 #d - расстояние между линиями| dz - толщина линии |nx,ny - количество линий по каждой оси
-def generate_mesh(nx: int,ny: int,d: float,dz: float,nz: int,start_z:float):
-    tr = []
+def generate_mesh(tr:list,nx: int,ny: int,d: float,dz: float,nz: int,start_z:float):
     tr1 = []
     for i_z in range(int(nz/2)):
         tr1 = generate_2layers(tr,nx,ny,d,dz,start_z)   
@@ -781,6 +786,10 @@ class ex11(QtWidgets.QWidget):
         self.but_gen_layer.setGeometry(QtCore.QRect(230, 120, 150, 40))
         self.but_gen_layer.clicked.connect(self.gen_layer)
 
+        self.but_clear = QtWidgets.QPushButton('Очистить траекторию', self)
+        self.but_clear.setGeometry(QtCore.QRect(230, 420, 150, 40))
+        self.but_clear.clicked.connect(self.clear_mesh)
+
         self.but_gen_sph = QtWidgets.QPushButton('Генерировать внесение', self)
         self.but_gen_sph.setGeometry(QtCore.QRect(230, 160, 150, 40))
         self.but_gen_sph.clicked.connect(self.gen_spher)
@@ -882,9 +891,11 @@ class ex11(QtWidgets.QWidget):
         self.label_name.setGeometry(QtCore.QRect(160, 375, 60, 20))
         self.label_name.setText('Name')
 
+    def clear_mesh(self):
+        self.koord_1 = []
     def gen_mesh(self):
         try:
-            self.koord_1 = generate_mesh(int(self.lin_nx.text()),int(self.lin_ny.text()),float(self.lin_d.text()),float(self.lin_dz.text()),int(self.lin_nz.text()),float(self.lin_startz.text()))
+            self.koord_1 = generate_mesh(self.koord_1,int(self.lin_nx.text()),int(self.lin_ny.text()),float(self.lin_d.text()),float(self.lin_dz.text()),int(self.lin_nz.text()),float(self.lin_startz.text()))
             self.update()
         except BaseException:
             print("Cannot generate mesh")
@@ -936,11 +947,12 @@ class ex11(QtWidgets.QWidget):
         qp.begin(self)
         qp.setRenderHint(QPainter.Antialiasing)
         self.drawLines(qp)
+        self.update()
 
     def pointTo25D(self,x:float,y:float,z:float)->"tuple[float,float]":
         x2d:float = 1.732*x-1.732*y
         y2d:float = x + y + 2*z
-        return x2d,y2d
+        return x2d,-y2d
 
     def koords3dTo25D(self,koords:list)->list:
         koords2d = []
