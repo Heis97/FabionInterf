@@ -451,8 +451,16 @@ def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, nd
     elif ndoz==2:
         cur_z = ' B'
     v_all = startE
-    f1.write(';'+name+' F'+str(round(F,4))+'\n; diam'+str(round(diam,4))+'\n; dz'+str(round(dz,4))+'\n; ndoz'+str(round(ndoz,4))+'\n; startE'+str(round(startE,4))+'\n')
-    f1.write('T'+str(ndoz))
+    f1.write(';'+name+
+    ' F'+str(round(F,4))+
+    '\n; diam'+str(round(diam,4))+
+    '\n; dz'+str(round(dz,4))+
+    '\n; ndoz'+str(round(ndoz,4))+
+    '\n; startE'+str(round(startE,4))+'\n')
+    f1.write('T'+str(int(ndoz))+'\n')
+    f1.write('G92 E0\n')
+    f1.write('M302 S0\n')
+    f1.write('G90\n')
     for i in range(len(tr)):
         x = tr[i][0]
         y = tr[i][1]
@@ -468,47 +476,57 @@ def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, nd
             v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
             v_all+=v
             f1.write('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
-        if(i==len(tr)-1):
 
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
+    f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
 
     f1.write(";Volume: "+str(0.058*(v_all-startE))+"cm2"+'\n')    
     f1.close()  
 
 
 
-def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int):
+def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float):
     f1=open(name,'w')
     F = F*60
-    v_all = 0.05
-    N = 5
+    Diam_syr = 10.5
+    cur_z= ' Z'
+    safe_z = 50
+    safe_z_intern = 5
+    if ndoz==1:
+        cur_z = ' A'
+    elif ndoz==2:
+        cur_z = ' B'
+
+    f1.write(';'+name+
+    ' F'+str(round(F,4))+
+    '\n; diam'+str(round(diam,4))+
+    '\n; dz'+str(round(dz,4))+
+    '\n; ndoz'+str(round(ndoz,4))+
+    '\n; startE'+str(round(startE,4))+'\n')
+    f1.write('T'+str(int(ndoz))+'\n')
+    f1.write('G92 E0\n')
+    f1.write('M302 S0\n')
+    f1.write('G90\n')
+    v_all = startE
     for i in range(len(tr)):
-        rasst = 1.
+        x = tr[i][0]
+        y = tr[i][1]
+        z = tr[i][2]
         if i == 0:
-            rasst = 1.
-        else:
-            x = tr[i][0]
-            y = tr[i][1]
-            z = tr[i][2]
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+4,4))+'\n')
-            N+=5
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z,4))+'\n')
-            N+=5
-            #f1.write('N'+str(N)+' G87 P2 P'+str(ndoz)+' P0\n')
-            #N+=5
-            x_ = tr[i-1][0]
-            y_ = tr[i-1][1]
-            z_ = tr[i-1][2] 
-            rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
-            k = 0.00513152
-            v = diam*dz*rasst
-            v= k*rasst
-            v_all+=v
-            f1.write('G1 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+2,4))+ ' E'+str(round(v_all,4))+ ' \n')
-            N+=5
-            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z+4,4))+  '\n')
-            N+=5
+            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+'\n')
+            f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  '\n')
         
+            
+        f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+'\n')
+        f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+'\n')
+
+        rasst = dz
+        v = diam*diam*rasst/(3.141592*(Diam_syr/2)**2)
+        v_all+=v
+
+        f1.write('G1 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+dz,4))+ ' E'+str(round(v_all,4))+ ' \n')
+        f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  '\n')
+
+    f1.write('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
     f1.close() 
 
 
@@ -832,7 +850,7 @@ class ex11(QtWidgets.QWidget):
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
         self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
-        self.lin_ndoz.setText('3')
+        self.lin_ndoz.setText('0')
 
         self.lin_startz = QtWidgets.QLineEdit(self)
         self.lin_startz.setGeometry(QtCore.QRect(30, 310, 120, 20))#startz
@@ -935,12 +953,19 @@ class ex11(QtWidgets.QWidget):
         except BaseException:
             print("Cannot generate file")
     def gen_file_1(self):
-        try:
+        #try:
             #self.koord_1 = generate_mesh(int(self.lin_nx.text()),int(self.lin_ny.text()),float(self.lin_d.text()),float(self.lin_dz.text()),int(self.lin_nz.text()))
-            generate_file_sph(self.koord_sph,self.lin_name.text(),float(self.lin_F.text()),float(self.lin_diam.text()),float(self.lin_dz.text()),float(self.lin_ndoz.text()))
-            self.update()
-        except BaseException:
-            pass
+        generate_file_sph(
+            self.koord_sph,
+            self.lin_name.text(),
+            float(self.lin_F.text()),
+            float(self.lin_diam.text()),
+            float(self.lin_dz.text()),
+            float(self.lin_ndoz.text()),
+            float(self.lin_startE.text()))
+        #self.update()
+        #except BaseException:
+            #pass
 
     def paintEvent(self, e):
         qp = QPainter()
