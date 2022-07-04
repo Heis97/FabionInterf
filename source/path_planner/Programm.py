@@ -12,7 +12,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint, QSize,
         Qt, QTime, QTimer,QThread)
-
+import os
 
 class PathPlannerWidg(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -62,7 +62,7 @@ class PathPlannerWidg(QtWidgets.QWidget):
 
         self.lin_mod = QtWidgets.QLineEdit(self)
         self.lin_mod.setGeometry(QtCore.QRect(0, 150, 200, 30))
-        self.lin_mod.setText("test_0.5_0.5_0.5.stl")
+        self.lin_mod.setText("extruder.stl")
 
         self.lin_traj = QtWidgets.QLineEdit(self)
         self.lin_traj.setGeometry(QtCore.QRect(0, 180, 200, 30))
@@ -70,7 +70,7 @@ class PathPlannerWidg(QtWidgets.QWidget):
         #self.but1.clicked.connect()
 
     def loadSurf(self):
-        m = self.ppw.extract_coords_from_stl(self.lin_mod.text())
+        m = self.ppw.extract_coords_from_stl("source\\"+self.lin_mod.text())
         mesh = Mesh3D( m,PrimitiveType.triangles)
         self.surf = mesh
         self.ppw.paint_objs = []

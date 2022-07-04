@@ -11,8 +11,7 @@ from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint, QSize,
         Qt, QTime, QTimer)
 
-
-
+from path_planner.Viewer3D_GL import Viewer3D_GL
 
 class BufferFrame:
     def __init__(self, x:float,y:float,z:float,f:float,v:float,g:int,d:int):

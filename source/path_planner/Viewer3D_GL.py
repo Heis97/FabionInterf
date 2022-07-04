@@ -1,5 +1,4 @@
 #from socket import *
-
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QPushButton,QSlider, QLineEdit, QOpenGLWidget,QTextEdit,
@@ -10,8 +9,6 @@ from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint,QPointF, QSize,
         Qt, QTime, QTimer)
 import OpenGL.GL as gl
-from matplotlib.backend_bases import MouseEvent
-
 from polygon import Mesh3D, Point3D,PrimitiveType
 
 class Paint_in_GL(object):
@@ -218,7 +215,7 @@ class GLWidget(QOpenGLWidget):
     def extract_coords_from_stl(self,stl_file):
         result = []
         coords = []
-
+        
         for l in open(stl_file):
             l = l.split()
             if l[0] == 'facet':
