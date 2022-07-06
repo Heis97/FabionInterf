@@ -517,15 +517,6 @@ def arrayViewer_GL_2d(X,Y,Z,off_y:float = 0.)->"list[list[Point3D]]":
         koords.append(sub_koords)
     return koords
 
-def draw_frame(matr: "list[Point3D]", windowGL: GLWidget):
-    points = createFrame(matr, 1)
-    frame1 = Mesh3D( points[0:2] ,PrimitiveType.lines)
-    frame2 = Mesh3D( points[2:4],PrimitiveType.lines)
-    frame3 = Mesh3D( points[4:6] ,PrimitiveType.lines)
-
-    windowGL.paint_objs.append(Paint_in_GL(0,1,1.0,4,PrimitiveType.lines,frame1))
-    windowGL.paint_objs.append(Paint_in_GL(1.0,0,1.0,4,PrimitiveType.lines,frame2))
-    windowGL.paint_objs.append(Paint_in_GL(1.0,1,0,4,PrimitiveType.lines,frame3))
 
 def angles_of_extruder(list_of_matr: "list[list[list[float]]]"):
     list_of_angles = []

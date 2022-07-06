@@ -9,7 +9,7 @@ from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint,QPointF, QSize,
         Qt, QTime, QTimer)
 import OpenGL.GL as gl
-from polygon import Mesh3D, Point3D,PrimitiveType
+from path_planner.polygon import Mesh3D, Point3D,PrimitiveType
 
 class Paint_in_GL(object):
     glList = None
@@ -79,7 +79,7 @@ class GLWidget(QOpenGLWidget):
         self.off_x=0.0
         self.off_y=0.0
         self.lastPos = QPoint()
-        self.zoom=1
+        self.zoom=70
         self.trolltechGreen = QColor.fromCmykF(1.0, 0.5, 0.5, 0.0)
         self.trolltechGreen1 = QColor.fromCmykF(1.0, 0.7, 0.7, 0.0)
         self.trolltechRed = QColor.fromCmykF(0.0, 1.0, 1.0, 0.0)
@@ -103,8 +103,8 @@ class GLWidget(QOpenGLWidget):
         
 
         #gl.glEnable(gl.GL_CULL_FACE) 
-        gl.glEnable(gl.GL_LIGHTING)
-        gl.glEnable(gl.GL_LIGHT0)
+        #gl.glEnable(gl.GL_LIGHTING)
+        #gl.glEnable(gl.GL_LIGHT0)
         lightPower = 1000.
         lightZeroPosition = [0.,0.,100.,1.]
         lightZeroColor = [lightPower,lightPower,lightPower,1.0] 
@@ -118,15 +118,15 @@ class GLWidget(QOpenGLWidget):
         self.resizeGL(self.w,self.h)
         self.getOpenglInfo()
        
-    def initPaint_in_GL(self,  paint_gls: Paint_in_GL):
-
-        
+    def initPaint_in_GL(self,  paint_gls: Paint_in_GL): 
         mesh_obj = paint_gls.mesh_obj
         if(paint_gls.matrs!=None):
             ind_m = self.render_count % len(paint_gls.matrs)
             mesh_obj = paint_gls.setTrasform(paint_gls.matrs[ind_m])
-        genList = gl.glGenLists(1)
-        gl.glNewList(genList, gl.GL_COMPILE)  
+        genList = []
+        #gl_list = gl.glGenLists(1)
+        genList.append(gl.glGenLists(1))
+        gl.glNewList(genList[-1], gl.GL_COMPILE)  
         v = paint_gls
         gl.glLineWidth(v.size)
         gl.glPointSize(10*v.size)
@@ -145,25 +145,46 @@ class GLWidget(QOpenGLWidget):
         elif v.obj_type == PrimitiveType.lines:
             gl.glEnable(gl.GL_LINE_SMOOTH)
             gl.glLineStipple(2,58360)
+            gl.glLineWidth(3.*v.size)
             gl.glBegin(gl.GL_LINES)
-                
+            len_points = len(v.mesh_obj.polygons)
+
+            for j in range(len_points):                
+                p1 = v.mesh_obj.polygons[j].vert_arr[0]  
+                p2 = v.mesh_obj.polygons[j].vert_arr[1] 
+                color1 = QColor.fromCmykF(p2.r, p2.g, p2.b, 0.0)
+                #color1 = QColor.fromCmykF(v.red, v.green, v.blue, 0.0)
+                self.setColor(color1)
+                if p2.extrude == True:
+                    gl.glVertex3d(p1.x,p1.y,p1.z)
+                    gl.glVertex3d(p2.x,p2.y,p2.z)
+                    gl.glNormal3d(0.5, 0.5, 0.5)
+            gl.glEnd()
+            gl.glEndList()
+
+            genList.append(gl.glGenLists(1))
+            gl.glNewList(genList[-1], gl.GL_COMPILE)  
+            gl.glLineWidth(v.size)
+            gl.glEnable(gl.GL_LINE_SMOOTH)
+            gl.glLineStipple(2,58360)
+            gl.glEnable(gl.GL_LINE_STIPPLE)  
+            gl.glBegin(gl.GL_LINES)
             len_points = len(v.mesh_obj.polygons)
             for j in range(len_points):
                 
                 p1 = v.mesh_obj.polygons[j].vert_arr[0]  
                 p2 = v.mesh_obj.polygons[j].vert_arr[1] 
-                color1 = QColor.fromCmykF(p2.r, p2.g, p2.b, 0.0)
+                #color1 = QColor.fromCmykF(p2.r, p2.g, p2.b, 0.0)
+                color1 = QColor.fromCmykF(v.red, v.green, v.blue, 0.0)
                 self.setColor(color1)
                 if p2.extrude == False:
-                    color1 = QColor.fromCmykF(1., 0., 0., 0.0)
-                    self.setColor(color1)
-                    #gl.glEnable(gl.GL_LINE_STIPPLE)                           
-                    
-                    #gl.glDisable(gl.GL_LINE_STIPPLE) 
-                gl.glVertex3d(p1.x,p1.y,p1.z)
-                gl.glVertex3d(p2.x,p2.y,p2.z)
-                gl.glNormal3d(0.5, 0.5, 0.5)
+                    color1 = QColor.fromCmykF(0., 1., 1., 0.0)
+                    self.setColor(color1)                         
+                    gl.glVertex3d(p1.x,p1.y,p1.z)
+                    gl.glVertex3d(p2.x,p2.y,p2.z)
+                    gl.glNormal3d(0.5, 0.5, 0.5)
             gl.glEnd()
+            gl.glDisable(gl.GL_LINE_STIPPLE)  
         
         elif v.obj_type == PrimitiveType.triangles:
             gl.glEnable(gl.GL_LIGHTING)
@@ -194,7 +215,9 @@ class GLWidget(QOpenGLWidget):
         for i in range(len(paint_gls)):
             if paint_gls[i].glList==None:
                 paint_gls[i].glList = self.initPaint_in_GL(paint_gls[i])
-            gl.glCallList(paint_gls[i].glList)
+            else:
+                for gl_list in paint_gls[i].glList:
+                    gl.glCallList(gl_list)
 
 
     def paintGL(self):
@@ -335,4 +358,43 @@ class GLWidget(QOpenGLWidget):
     def setColor(self, c):
         gl.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())  
 
+    def addLines(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float):
+        mesh3d_traj = Mesh3D(traj,PrimitiveType.lines)
+        self.paint_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
+
+    def clear(self):
+        self.paint_objs= []
+
+    def draw_start_frame(self,size:float):
+        frame1 = Mesh3D( [Point3D(0, 0, 0,True,0,1,1),Point3D(size, 0, 0,True,0,1,1)] ,PrimitiveType.lines)
+        frame2 = Mesh3D( [Point3D(0, 0, 0,True,1,0,1),Point3D( 0,size, 0,True,1,0,1)],PrimitiveType.lines)
+        frame3 = Mesh3D( [Point3D(0, 0, 0,True,1,1,0),Point3D( 0, 0,size,True,1,1,0)] ,PrimitiveType.lines)
+
+        self.paint_objs.append(Paint_in_GL(0,1,1.0,0.3,PrimitiveType.lines,frame1))
+        self.paint_objs.append(Paint_in_GL(1.0,0,1.0,0.3,PrimitiveType.lines,frame2))
+        self.paint_objs.append(Paint_in_GL(1.0,1,0,0.3,PrimitiveType.lines,frame3))
+
+    def draw_frame(self,matr: "list[Point3D]"):
+        points = self.createFrame(matr, 1)
+        frame1 = Mesh3D( points[0:2] ,PrimitiveType.lines)
+        frame2 = Mesh3D( points[2:4],PrimitiveType.lines)
+        frame3 = Mesh3D( points[4:6] ,PrimitiveType.lines)
+
+        self.paint_objs.append(Paint_in_GL(0,1,1.0,4,PrimitiveType.lines,frame1))
+        self.paint_objs.append(Paint_in_GL(1.0,0,1.0,4,PrimitiveType.lines,frame2))
+        self.paint_objs.append(Paint_in_GL(1.0,1,0,4,PrimitiveType.lines,frame3))
+
+    def createFrame(self,matrix,dim:float):
+        p1 = Point3D(matrix[0][3],matrix[1][3],matrix[2][3])
+        p2 = Point3D(dim*matrix[0][0],dim*matrix[0][1],dim*matrix[0][2])
+        p3 = Point3D(dim*matrix[1][0],dim*matrix[1][1],dim*matrix[1][2])
+        p4 = Point3D(dim*matrix[2][0],dim*matrix[2][1],dim*matrix[2][2])
+        ps = []
+        ps.append(p1) 
+        ps.append(p1+p2)
+        ps.append(p1) 
+        ps.append(p1+p3)
+        ps.append(p1) 
+        ps.append(p1+p4) 
+        return ps
 
