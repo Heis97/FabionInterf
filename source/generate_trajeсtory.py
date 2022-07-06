@@ -131,7 +131,7 @@ def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndo
         y = tr[i][1]
         z = tr[i][2]
         if i == 0:
-            code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+'\n')
+            code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+' F600.0\n')
             code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  '\n')
         
             
@@ -142,8 +142,10 @@ def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndo
         v = diam*diam*rasst/(3.141592*(Diam_syr/2)**2)
         v_all+=v
 
-        code+=('G1 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+dz,4))+ ' E'+str(round(v_all,4))+ ' \n')
-        code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  '\n')
+        code+=('G1' +' E'+str(round(v_all,4))+ ' \n')
+        code+=('G0' +cur_z +str(round(z+dz,4))+ ' F50.0 \n')
+        code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  ' F'+str(round(F,4))+'\n')
+        print('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  ' F'+str(round(F,4))+'\n')
 
     code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
 
@@ -212,6 +214,7 @@ def generate_2layers(tr: list,nx: int,ny: int,d: float,dz: float,start_z:float):
         tr.append([x,y,z,layer])
 
         z+=dz
+        tr.append([x,y,z,layer])
         layer +=1
         if(nx%2==0):
             for i in range(0,int(nx/2)):
@@ -281,6 +284,7 @@ def generate_2layers(tr: list,nx: int,ny: int,d: float,dz: float,start_z:float):
 
         z+=dz
         layer +=1
+        tr.append([x,y,z,layer])
         if(nx%2==0):
             for i in range(0,int(nx/2)):
 
@@ -402,5 +406,12 @@ def generate_begin(tr:list,Lx:float, Ly:float, delt:float):
     tr.append([x,y,z])#0
     return tr
 
+def generate_lines_x(n: int):
+    ps = []
+    for i in range(n+1):
+        ps.append(Point3D(0, i / n, 0))
+        ps.append(Point3D(1, i / n, 0))
+
+    return ps
 
 
