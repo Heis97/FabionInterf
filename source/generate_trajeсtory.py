@@ -168,7 +168,7 @@ def generate_fileGcode_regemat(tr: list, print_settings:PrintSettings)->str:
     ndoz: int = print_settings.ndoz
     startE:float = print_settings.startE
     diam_syr:float = print_settings.diam_syr
-    code = ";Regemat"
+    code = ""
     
     F = Flow
     Diam_syr = diam_syr
@@ -177,31 +177,27 @@ def generate_fileGcode_regemat(tr: list, print_settings:PrintSettings)->str:
     safe_z = 20
 
     v_all = startE
-    code += (';'+name+
-    ' F'+str(round(F,4))+
-    '\n; diam'+str(round(diam,4))+
-    '\n; dz'+str(round(dz,4))+
-    '\n; ndoz'+str(round(ndoz,4))+
-    '\n; startE'+str(round(startE,4))+'\n')
 
     code +=(
-        'M109 S249 H4; set temperature H4 \n'+
+        'M109 S60 H6; set temperature H6 \n'+
+        'M109 S240 H4; set temperature H4 \n'+     
         'G28 W3; homing\n'+
         'G28 XYZ; homing\n'+
-        'T0\n'+
-        'G0 Z10 F5 ; initial movement for warming\n'+
-        'T3; use tool\n'+
-        'G92 E0 \n'+
-        'G1 E10 F6  ; pre-compensate \n'+
-        'G92 E0 \n')
+        'T'+str(int(ndoz))+ '\n'+
+        'G0 Z20 F5 ; initial movement for warming\n'+
+        'T'+str(int(ndoz))+ '; use tool\n')
     for i in range(len(tr)):
         x = tr[i][0]
         y = tr[i][1]
         z = tr[i][2]
         if(i==0):
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+'\n')
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+  '\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+' F20\n'+
+        'G92 E0 \n'+
+        'G1 E10 F6  ; pre-compensate \n'+
+        'G92 E0 \n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+  ' F10\n')
             code +=('T'+str(int(ndoz))+ ' S0 \n')
+
         else:
             x_ = tr[i-1][0]
             y_ = tr[i-1][1]
@@ -264,17 +260,17 @@ def generate_2layers(tr: list,nx: int,ny: int,d: float,dz: float,start_xyz:Point
     x = start_xyz.x
     y = start_xyz.y
     z = start_xyz.z
-    
+    z+=dz
     layer = 0
     if len(tr)==0 or (tr[-1][0]==0 and tr[-1][1]==0 and tr[-1][2]==0):
-        tr = [[x,y,z,0]]
+        tr = [[x-20,y,z,0],[x,y,z,0]]
         pass
     else:
         x = tr[-1][0]
         y = tr[-1][1]
         z = tr[-1][2]
         layer =tr[-1][3]+1
-    z+=dz
+    
     tr.append([x,y,z,layer])
     if(ny%2==0):
         for i in range(0,int(ny/2)):

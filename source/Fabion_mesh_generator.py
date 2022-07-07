@@ -65,27 +65,27 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_nx = QtWidgets.QLineEdit(self)
         self.lin_nx.setGeometry(QtCore.QRect(30, 70, 120, 20))#nx
-        self.lin_nx.setText('4')
+        self.lin_nx.setText('10')
 
         self.lin_ny = QtWidgets.QLineEdit(self)
         self.lin_ny.setGeometry(QtCore.QRect(30, 100, 120, 20))#ny
-        self.lin_ny.setText('4')
+        self.lin_ny.setText('10')
 
         self.lin_d = QtWidgets.QLineEdit(self)
         self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
-        self.lin_d.setText('1.2')
+        self.lin_d.setText('2.0')
 
         self.lin_dz = QtWidgets.QLineEdit(self)
         self.lin_dz.setGeometry(QtCore.QRect(30, 160, 120, 20))#dZ
-        self.lin_dz.setText('0.3')
+        self.lin_dz.setText('0.25')
 
         self.lin_diam = QtWidgets.QLineEdit(self)
         self.lin_diam.setGeometry(QtCore.QRect(30, 190, 120, 20))#diam
-        self.lin_diam.setText('0.6')
+        self.lin_diam.setText('0.8')
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
-        self.lin_F.setText('3')
+        self.lin_F.setText('5')
 
         self.lin_nz = QtWidgets.QLineEdit(self)
         self.lin_nz.setGeometry(QtCore.QRect(30, 250, 120, 20))#nz
@@ -93,15 +93,15 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
         self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
-        self.lin_ndoz.setText('0')
+        self.lin_ndoz.setText('3')
 
         self.lin_startx = QtWidgets.QLineEdit(self)
         self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startz
-        self.lin_startx.setText('0')
+        self.lin_startx.setText('160')
 
         self.lin_starty = QtWidgets.QLineEdit(self)
         self.lin_starty.setGeometry(QtCore.QRect(70, 310, 40, 20))#starty
-        self.lin_starty.setText('0')
+        self.lin_starty.setText('50')
 
         self.lin_startz = QtWidgets.QLineEdit(self)
         self.lin_startz.setGeometry(QtCore.QRect(110, 310, 40, 20))#startz
@@ -235,6 +235,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         gcode = generate_fileGcode_regemat(self.koord_1,print_settings)          
         self.prog_code+=gcode
         self.addToViewerTraj(parse_g_code(self.prog_code))
+        self.gen_file()
         
     def gen_layer(self):
         try:
