@@ -14,6 +14,8 @@ from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint, QSize,
 from path_planner.Viewer3D_GL import GLWidget
 from generate_trajeсtory import *
 from g_code_parser import *
+from print_settings import PrintSettings,TrajectorySettings
+
 
 class Fabion_mesh_app(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -32,12 +34,16 @@ class Fabion_mesh_app(QtWidgets.QWidget):
     def build(self):
 
         self.viewer3d = GLWidget(self)
-        self.viewer3d.setGeometry(QtCore.QRect(400, 10, 600, 600))
+        self.viewer3d.setGeometry(QtCore.QRect(550, 10, 600, 600))
         self.viewer3d.draw_start_frame(10.)
 
         self.but_gen_mesh = QtWidgets.QPushButton('Генерировать решётку', self)
         self.but_gen_mesh.setGeometry(QtCore.QRect(230, 80, 150, 40))
         self.but_gen_mesh.clicked.connect(self.gen_mesh)
+
+        self.but_gen_mesh = QtWidgets.QPushButton('Генерировать решётку\n Regemat', self)
+        self.but_gen_mesh.setGeometry(QtCore.QRect(230+150, 80, 150, 40))
+        self.but_gen_mesh.clicked.connect(self.gen_mesh_regemat)
 
         self.but_gen_layer = QtWidgets.QPushButton('Генерировать слой', self)
         self.but_gen_layer.setGeometry(QtCore.QRect(230, 120, 150, 40))
@@ -52,8 +58,10 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.but_gen_sph.clicked.connect(self.gen_spher)
 
         self.but_gen_file = QtWidgets.QPushButton('Генерировать файл', self)
-        self.but_gen_file.setGeometry(QtCore.QRect(230, 420, 150, 40))
+        self.but_gen_file.setGeometry(QtCore.QRect(230, 320, 150, 40))
         self.but_gen_file.clicked.connect(self.gen_file)
+
+
 
         self.lin_nx = QtWidgets.QLineEdit(self)
         self.lin_nx.setGeometry(QtCore.QRect(30, 70, 120, 20))#nx
@@ -87,16 +95,28 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
         self.lin_ndoz.setText('0')
 
+        self.lin_startx = QtWidgets.QLineEdit(self)
+        self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startz
+        self.lin_startx.setText('0')
+
+        self.lin_starty = QtWidgets.QLineEdit(self)
+        self.lin_starty.setGeometry(QtCore.QRect(70, 310, 40, 20))#starty
+        self.lin_starty.setText('0')
+
         self.lin_startz = QtWidgets.QLineEdit(self)
-        self.lin_startz.setGeometry(QtCore.QRect(30, 310, 120, 20))#startz
+        self.lin_startz.setGeometry(QtCore.QRect(110, 310, 40, 20))#startz
         self.lin_startz.setText('0')
 
         self.lin_startE = QtWidgets.QLineEdit(self)
         self.lin_startE.setGeometry(QtCore.QRect(30, 340, 120, 20))#startz
         self.lin_startE.setText('0')
 
+        self.lin_diam_syr = QtWidgets.QLineEdit(self)
+        self.lin_diam_syr.setGeometry(QtCore.QRect(30, 370, 120, 20))#diam_syr
+        self.lin_diam_syr.setText('1.75')
+
         self.lin_name = QtWidgets.QLineEdit(self)
-        self.lin_name.setGeometry(QtCore.QRect(30, 400, 300, 20))#name
+        self.lin_name.setGeometry(QtCore.QRect(30, 430, 300, 20))#name
         self.lin_name.setText('g_new_mesh.txt')
         
         #----------------------------------------------
@@ -134,15 +154,20 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.label_nx = QtWidgets.QLabel(self)
         self.label_nx.setGeometry(QtCore.QRect(160, 310, 60, 20))
-        self.label_nx.setText('startz')
+        self.label_nx.setText('startxyz')
 
         self.label_nx = QtWidgets.QLabel(self)
         self.label_nx.setGeometry(QtCore.QRect(160, 340, 60, 20))
         self.label_nx.setText('startE')
 
+        self.label_nx = QtWidgets.QLabel(self)
+        self.label_nx.setGeometry(QtCore.QRect(160, 370, 60, 20))
+        self.label_nx.setText('Diam_syr')
+
         self.label_name = QtWidgets.QLabel(self)
-        self.label_name.setGeometry(QtCore.QRect(160, 375, 60, 20))
+        self.label_name.setGeometry(QtCore.QRect(160, 405, 60, 20))
         self.label_name.setText('Name')
+
     def clear_mesh(self):
         self.prog_code = ""
         self.koord_1 = [[0,0,0,0]]
@@ -180,6 +205,36 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             self.addToViewerTraj(parse_g_code(self.prog_code))            
         except BaseException:
             print("Cannot generate mesh")
+
+    def setSettings(self)->"tuple[PrintSettings,TrajectorySettings]":
+        print_settings = PrintSettings(
+            self.lin_name.text(),
+                float(self.lin_F.text()),
+                float(self.lin_diam.text()),
+                float(self.lin_dz.text()),
+                float(self.lin_ndoz.text()),
+                float(self.lin_startE.text()),
+                float(self.lin_diam_syr.text()))
+        trajectory_settings = TrajectorySettings(
+                int(self.lin_nx.text()),
+                int(self.lin_ny.text()),
+                float(self.lin_d.text()),
+                float(self.lin_dz.text()),
+                int(self.lin_nz.text()),
+                Point3D(
+                    float(self.lin_startx.text()),
+                    float(self.lin_starty.text()),
+                    float(self.lin_startz.text())
+                    ))
+        
+        return print_settings, trajectory_settings    
+
+    def gen_mesh_regemat(self):
+        print_settings, trajectory_settings = self.setSettings()
+        self.koord_1 = generate_mesh_regemat([self.koord_1[-1]],trajectory_settings)
+        gcode = generate_fileGcode_regemat(self.koord_1,print_settings)          
+        self.prog_code+=gcode
+        self.addToViewerTraj(parse_g_code(self.prog_code))
         
     def gen_layer(self):
         try:
