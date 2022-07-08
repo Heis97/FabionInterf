@@ -3,18 +3,7 @@ import random
 from Viewer3D_GL import Paint_in_GL, Point3D, PrimitiveType,GLWidget
 from polygon import Mesh3D, Polygon3D
 
-def rotate_point(x: float, y: float, alfa: float):
-    x_r = x * np.cos(alfa) - y * np.sin(alfa)
-    y_r = x * np.sin(alfa) + y * np.cos(alfa)
-    return x_r, y_r
-
-def rotate_list_points(points: "list[Point3D]", alfa: float):
-    rotated_points = []
-    for i in range(len(points)):
-        p_r_x, p_r_y = rotate_point(points[i].x, points[i].y, alfa)
-        point_rot = Point3D(p_r_x, p_r_y, points[i].z)
-        rotated_points.append(point_rot)
-    return rotated_points                
+           
 
 def rasterxyMesh3D(mesh:Mesh3D,resolution:float):
     minX, maxX,minY,maxY = findGabPol(mesh.polygons)
@@ -179,7 +168,19 @@ def point_on_triangleMAP(mesh: Mesh3D, polygon: Polygon3D,mapxy:"list[list[int]]
 
             
     
+def rotate_point(x: float, y: float, alfa: float):
+    x_r = x * np.cos(alfa) - y * np.sin(alfa)
+    y_r = x * np.sin(alfa) + y * np.cos(alfa)
+    return x_r, y_r
 
+def rotate_list_points(points: "list[Point3D]", alfa: float):
+    rotated_points = []
+    for i in range(len(points)):
+        p_r_x, p_r_y = rotate_point(points[i].x, points[i].y, alfa)
+        point_rot = Point3D(p_r_x, p_r_y, points[i].z)
+        rotated_points.append(point_rot)
+    return rotated_points     
+    
 def findGab(cont:"list[Point3D]"):
     minX = 100000
     minY = 100000
@@ -243,11 +244,6 @@ def cutMesh(mesh: Mesh3D,cont:"list[Point3D]")->Mesh3D:
     mesh_c.polygons = polygons.copy()
     return mesh_c 
         
-
-
-
-
-
 def GenerateContour(n: int,rad:float,delt:float)->"list[Point3D]":
     step = 2*np.pi/n
     a = 0
@@ -367,7 +363,71 @@ def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
     #добавление точки слева
     return traj
 
-   
+def Generate_one_layer_traj (contour: "list[Point3D]", step: float, alfa: float, surface: Mesh3D, div_step: float, zet: float, trans: float, r:float,g:float,b:float,mapxy:"list[list[int]]"=None,resolution:float = 1.):
+    print("start gen Layer")
+    traj = GeneratePositionTrajectory_angle(contour, step, alfa)
+    print("GeneratePositionTrajectory Done "+ str(len(traj))+" len")
+    div_tr = divideTraj(traj, div_step)
+    fil_tr = divideTraj(div_tr, div_step/2)
+    print("divideTraj Done")
+    mesh_trj = Mesh3D(fil_tr,PrimitiveType.lines)
+    print("Mesh3D Done")
+    proj_traj,normal_arr = projection(surface,  mesh_trj, zet,r,g,b,mapxy,resolution)
+    print("projection Done")
+    proj_traj[0].z += trans
+    proj_traj[-1].z += trans
+    proj_traj[0].extrude = False
+    proj_traj[1].extrude = False
+    proj_traj[-1].extrude = False
+
+    matrs =  matrix_of_rotation(proj_traj,normal_arr, surface)
+    print("matrix_of_rotation Done")
+    return  proj_traj,normal_arr, matrs
+
+
+def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
+    proj_traj_f = []
+    normal_arr_f = []
+    matrs_f = []
+    proj_traj_f.append(proj_traj[0])
+    normal_arr_f.append(normal_arr[0])
+    matrs_f.append(matrs[0])
+    for i in range(1,len(proj_traj)):
+        dist = distance( proj_traj_f[-1],proj_traj[i])
+        if dist>filt:
+            proj_traj_f.append(proj_traj[i])
+            normal_arr_f.append(normal_arr[i])
+            matrs_f.append(matrs[i])
+
+    return proj_traj_f,normal_arr_f, matrs_f
+        
+
+
+def Generate_multiLayer (contour: "list[Point3D]", step: float, alfa: float, surface: Mesh3D, div_step: float, zet: float, amount: int, trans: float):
+    colors = [[0.,0.5,0.5],[1.,0.5,0.5],[0.,1.0,0.5],[0.,0.5,1.0],[0.,0.5,0.5],[0.,0.5,0.5],[0.,0.5,0.5],[0.,0.5,0.5]]
+    proj_traj:"list[Point3D]" = []
+    normal_arr = []
+    matrs = []
+    cut_mesh = cutMesh(surface,contour)
+    cut_mesh.save("cutted")
+    
+    resol = 0.01
+    mapxy = rasterxyMesh3D(cut_mesh,resol)
+    gs_mesh = gaussMesh(cut_mesh,mapxy)
+    #print(mapxy)
+    print("cut_mesh_len:"+str(len(cut_mesh.polygons)) )
+    for i in range (amount):
+        alfa2 = alfa
+        if i % 2 == 0:
+            alfa2 += np.pi/2
+        p, n, m = Generate_one_layer_traj (contour, step, alfa2, gs_mesh , div_step, zet*(i+1), trans,colors[i][0],colors[i][1],colors[i][2],mapxy,resol)
+        proj_traj += p
+        normal_arr += n
+        matrs += m
+        
+    return filResTraj(step/2,proj_traj,normal_arr, matrs)
+
+#----------------------------------------------------------------------------   
 def pass_array(array, x_w, y_w):
     row_len = len(array)
     col_len = len(array[0])
@@ -377,19 +437,14 @@ def pass_array(array, x_w, y_w):
         for j in range (0,col_len-y_w+1):
             mov_aver_array[i][j] = eval_aver_array(take_small_window(array, x_w, y_w, i, j))
     return mov_aver_array       
-
-
 def take_small_window(ar, x_w, y_w, x_st, y_st):
     tiny_arr = empty_ar(x_w, y_w)
     for i in range(0,x_w):
         for j in range(0,y_w):
             tiny_arr[i][j] = ar[i+x_st][j+y_st]
     return tiny_arr
-#_________________________________________________________________
-# ищет количество столбцов и строк двухмерного массива
 def size_of_2dim_array(array):
     return len(array), len(array[0])
-
 def cut_array(array, offset):
     row_len, col_len  = size_of_2dim_array(array) # ищет количество столбцов и строк двухмерного массива
     cutted_array = empty_ar(row_len - 2*offset, col_len - 2*offset) # создаем пустой вырезанный массив
@@ -398,9 +453,6 @@ def cut_array(array, offset):
         for j in range(0, cutted_col):
             cutted_array[i][j] = array[i+offset][j+offset]
     return cutted_array 
-
-#нужна для прохождения массива без краёв, которые неизвестны (центр ядра)    
-#на вход - массив, размеры окна, возвращает - сглаженный массив
 def pass_array_center(array, x_window, y_window):
     row_len, col_len  = size_of_2dim_array(array) #вычисляем размер входного массива
     offset_window_x = int((x_window - 1)/2) # расстояние от центра до края массива (ещё одна характеристика размеров окна)
@@ -417,8 +469,6 @@ def pass_array_center(array, x_window, y_window):
         print("i: "+str(i))
     
     return mov_aver_array      
-
-# взять подмассив с размерами окна и центром в точке x_start, y_start из большого массива
 def take_small_window_center(ar, x_window, y_window, x_start, y_start):
     offset_window_x = int((x_window - 1)/2) # расстояние от центра до края массива (ещё одна характеристика размеров окна)
     offset_window_y = int((y_window - 1)/2)
@@ -427,8 +477,6 @@ def take_small_window_center(ar, x_window, y_window, x_start, y_start):
         for j in range(0,y_window):
             tiny_arr[i][j] = ar[i+x_start-offset_window_x][j+y_start-offset_window_y]
     return tiny_arr
-
-# находим среднее арифметическое значений окна
 def eval_aver_array(array):
     sum = 0
     for i in range(len(array)):
@@ -436,8 +484,6 @@ def eval_aver_array(array):
             sum = sum+array[i][j]
     size = len(array)*len(array[0])
     return float(sum)/float(size)
-
-# создание пустого массива
 def empty_ar(rows, columns):
 
     b = columns*[0.]
@@ -445,20 +491,12 @@ def empty_ar(rows, columns):
     for i in range(len(ar)):
         ar[i] = np.array(b)
     return np.array(ar)
-
-# массив заполненный значениями k
 def empty_ar_k(rows, columns, k):
     b = columns*[k]
     ar = rows *[k]
     for i in range(len(ar)):
         ar[i] = np.array(b)
     return np.array(ar)
-
-#____________________________________________-
-
-
-
-# принимает на вход размер ядра свёртки, возвращает массив координат сгенерированной зашумлённой повверхности, 
 def surface(kernelSize:int = 3): 
     # function for Z values
     def f(x, y):
@@ -492,21 +530,18 @@ def surface(kernelSize:int = 3):
     #print("ar_cutted0:" + str(ar_cutted[0][0]))
     #сгенерированная сетка, сглаженная сетка
     return [X,Y,Z],[X_cutted,Y_cutted,ar_cutted]
-
 def arrayViewer(X,Y,Z):
     koords = []
     for i in range(len(X)):
         for j in range(len(X[0])):
             koords.append([X[i][j],Y[i][j],Z[i][j],1])
     return koords
-
 def arrayViewer_GL(X,Y,Z):
     koords:list[Point3D] = []
     for i in range(len(X)):
         for j in range(len(X[0])):
             koords.append(Point3D(X[i][j],Y[i][j],Z[i][j]))
     return koords
-
 def arrayViewer_GL_2d(X,Y,Z,off_y:float = 0.)->"list[list[Point3D]]":
     koords:list[list[Point3D]] = []
     print("Z0:" + str(Z[0][0]))
@@ -516,8 +551,6 @@ def arrayViewer_GL_2d(X,Y,Z,off_y:float = 0.)->"list[list[Point3D]]":
             sub_koords.append(Point3D(X[i][j],Y[i][j]+off_y,Z[i][j]))
         koords.append(sub_koords)
     return koords
-
-
 def angles_of_extruder(list_of_matr: "list[list[list[float]]]"):
     list_of_angles = []
     for i in range (len(list_of_matr)):
@@ -526,7 +559,6 @@ def angles_of_extruder(list_of_matr: "list[list[list[float]]]"):
         a = np.arcsin((list_of_matr[i][1][0])/np.cos(b))
         list_of_angles.append([list_of_matr[i][0][3],list_of_matr[i][1][3], list_of_matr[i][2][3], a, b, c])
     return list_of_angles
-
 def push_string(value_of_matr: "list[list[float]]"):
     full_str = ""
     for i in range (len(value_of_matr)):  
@@ -534,50 +566,13 @@ def push_string(value_of_matr: "list[list[float]]"):
             full_str += str(value_of_matr[i][j]) + " "
         full_str += "\n"
     return full_str
-
 def ToStringList(cont:"list[Point3D]"):
         text = "___________\n"
         for i in range(len(cont)):
             text+=cont[i].ToString()+" \n"
         return text
 
-def Generate_one_layer_traj (contour: "list[Point3D]", step: float, alfa: float, surface: Mesh3D, div_step: float, zet: float, trans: float, r:float,g:float,b:float,mapxy:"list[list[int]]"=None,resolution:float = 1.):
-    print("start gen Layer")
-    traj = GeneratePositionTrajectory_angle(contour, step, alfa)
-    print("GeneratePositionTrajectory Done "+ str(len(traj))+" len")
-    div_tr = divideTraj(traj, div_step)
-    fil_tr = divideTraj(div_tr, div_step/2)
-    print("divideTraj Done")
-    mesh_trj = Mesh3D(fil_tr,PrimitiveType.lines)
-    print("Mesh3D Done")
-    proj_traj,normal_arr = projection(surface,  mesh_trj, zet,r,g,b,mapxy,resolution)
-    print("projection Done")
-    proj_traj[0].z += trans
-    proj_traj[-1].z += trans
-    proj_traj[0].extrude = False
-    proj_traj[1].extrude = False
-    proj_traj[-1].extrude = False
 
-    matrs =  matrix_of_rotation(proj_traj,normal_arr, surface)
-    print("matrix_of_rotation Done")
-    return  proj_traj,normal_arr, matrs
-
-def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
-    proj_traj_f = []
-    normal_arr_f = []
-    matrs_f = []
-    proj_traj_f.append(proj_traj[0])
-    normal_arr_f.append(normal_arr[0])
-    matrs_f.append(matrs[0])
-    for i in range(1,len(proj_traj)):
-        dist = distance( proj_traj_f[-1],proj_traj[i])
-        if dist>filt:
-            proj_traj_f.append(proj_traj[i])
-            normal_arr_f.append(normal_arr[i])
-            matrs_f.append(matrs[i])
-
-    return proj_traj_f,normal_arr_f, matrs_f
-        
 def gaussMesh(mesh:Mesh3D, mapxy:"list[list[int]]"=None,wind:int = 30):
     for y in range(wind,len(mapxy)-wind):
         for x in range(wind,len(mapxy[y])-wind):
@@ -586,30 +581,6 @@ def gaussMesh(mesh:Mesh3D, mapxy:"list[list[int]]"=None,wind:int = 30):
                 for x1 in range(x-wind,x+wind):
                     gauss_n += mesh.polygons[mapxy[x][y]].n
             mesh.polygons[mapxy[x][y]].n = gauss_n.normalyse()
-
-def Generate_multiLayer (contour: "list[Point3D]", step: float, alfa: float, surface: Mesh3D, div_step: float, zet: float, amount: int, trans: float):
-    colors = [[0.,0.5,0.5],[1.,0.5,0.5],[0.,1.0,0.5],[0.,0.5,1.0],[0.,0.5,0.5],[0.,0.5,0.5],[0.,0.5,0.5],[0.,0.5,0.5]]
-    proj_traj:"list[Point3D]" = []
-    normal_arr = []
-    matrs = []
-    cut_mesh = cutMesh(surface,contour)
-    cut_mesh.save("cutted")
-    
-    resol = 0.01
-    mapxy = rasterxyMesh3D(cut_mesh,resol)
-    gs_mesh = gaussMesh(cut_mesh,mapxy)
-    #print(mapxy)
-    print("cut_mesh_len:"+str(len(cut_mesh.polygons)) )
-    for i in range (amount):
-        alfa2 = alfa
-        if i % 2 == 0:
-            alfa2 += np.pi/2
-        p, n, m = Generate_one_layer_traj (contour, step, alfa2, gs_mesh , div_step, zet*(i+1), trans,colors[i][0],colors[i][1],colors[i][2],mapxy,resol)
-        proj_traj += p
-        normal_arr += n
-        matrs += m
-        
-    return filResTraj(step/2,proj_traj,normal_arr, matrs)
 
 def saveTrajTxt(traj:"list[Point3D]",list_of_matr: "list[list[list[float]]]",name:str):
     f1=open(name+'.txt','w')
