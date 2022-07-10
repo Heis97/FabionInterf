@@ -6,12 +6,14 @@ from polygon import Mesh3D, Polygon3D
            
 
 def rasterxyMesh3D(mesh:Mesh3D,resolution:float):
+    
     minX, maxX,minY,maxY = findGabPol(mesh.polygons)
     mapXY:"list[list[int]]" = []*int(200/resolution)
     for i in range(int(200/resolution)):
         mapXY.append([0]*int(200/resolution))
     for i in range(len(mesh.polygons)):
         minX, maxX,minY,maxY = findGab(mesh.polygons[i].vert_arr)
+        print(i)
         for x in range(int(minX/resolution),int(maxX/resolution)):
             for y in range(int(minY/resolution),int(maxY/resolution)):                    
                 mapXY[x][y] = i
@@ -411,16 +413,16 @@ def Generate_multiLayer (contour: "list[Point3D]", step: float, alfa: float, sur
     cut_mesh = cutMesh(surface,contour)
     cut_mesh.save("cutted")
     
-    resol = 0.01
+    resol = 0.1
     mapxy = rasterxyMesh3D(cut_mesh,resol)
-    gs_mesh = gaussMesh(cut_mesh,mapxy)
+   # gs_mesh = gaussMesh(cut_mesh,mapxy)
     #print(mapxy)
     print("cut_mesh_len:"+str(len(cut_mesh.polygons)) )
     for i in range (amount):
         alfa2 = alfa
         if i % 2 == 0:
             alfa2 += np.pi/2
-        p, n, m = Generate_one_layer_traj (contour, step, alfa2, gs_mesh , div_step, zet*(i+1), trans,colors[i][0],colors[i][1],colors[i][2],mapxy,resol)
+        p, n, m = Generate_one_layer_traj (contour, step, alfa2, cut_mesh , div_step, zet*(i+1), trans,colors[i][0],colors[i][1],colors[i][2],mapxy,resol)
         proj_traj += p
         normal_arr += n
         matrs += m
@@ -500,8 +502,8 @@ def empty_ar_k(rows, columns, k):
 def surface(kernelSize:int = 3): 
     # function for Z values
     def f(x, y):
-        noise = random.uniform(-5,5)
-        noise = 0
+        noise = random.uniform(-1,1)
+        #noise = 0
         vyr =10+0.3*( 0.2*(((x**2)/20) - ((y**2)/4))+0.5*x+noise)
         #vyr  = 10.+0.02*x**2+0.02*y**2
         return vyr
@@ -634,13 +636,13 @@ def initWind(window:GLWidget):
     mesh3d_traj = Mesh3D(proj_traj,PrimitiveType.lines)
     window.paint_objs.append(Paint_in_GL(0.5,1,0.5,5,PrimitiveType.lines,mesh3d_traj))
 
-    extruder_m = window.extract_coords_from_stl("extruder.stl")
+    
+    window.paint_objs.append(Paint_in_GL(0.5,0.5,0,1,PrimitiveType.triangles,mesh3d_surface))
+    extruder_m = window.extract_coords_from_stl("path_planner/extruder.stl")
     extruder_mesh = Mesh3D( extruder_m,PrimitiveType.triangles)
     #extruder_mesh.scaleMesh(0.01)
     extruder_mesh.invertMormals()
     extruder_mesh.setTransform(matrs[0])
-    window.paint_objs.append(Paint_in_GL(0.5,0.5,0,1,PrimitiveType.triangles,mesh3d_surface))
-    
     #glObjExtr = Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
     #glObjExtr.matrs = matrs
     #window.paint_objs.append(glObjExtr)

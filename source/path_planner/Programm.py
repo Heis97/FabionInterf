@@ -62,7 +62,7 @@ class PathPlannerWidg(QtWidgets.QWidget):
 
         self.lin_mod = QtWidgets.QLineEdit(self)
         self.lin_mod.setGeometry(QtCore.QRect(0, 150, 200, 30))
-        self.lin_mod.setText("extruder.stl")
+        self.lin_mod.setText("path_planner/extruder.stl")
 
         self.lin_traj = QtWidgets.QLineEdit(self)
         self.lin_traj.setGeometry(QtCore.QRect(0, 180, 200, 30))
@@ -82,10 +82,21 @@ class PathPlannerWidg(QtWidgets.QWidget):
 
     def compPlan(self):
         if self.cont!=None and self.surf!=None:
-            proj_traj,normal_arr, matrs = PathPlanner.Generate_multiLayer(self.cont, 1.6, np.pi/2, self.surf, 1.3, 0.3, 2, 5)
+            proj_traj,normal_arr, matrs = PathPlanner.Generate_multiLayer(self.cont, 1.6, np.pi/2, self.surf, 1.3, 0.3, 3, 5)
             mesh3d_traj = Mesh3D(proj_traj,PrimitiveType.lines)
-            self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(0.5,1,0.5,5,PrimitiveType.lines,mesh3d_traj))
+            self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(0.5,1,0.5,1,PrimitiveType.lines,mesh3d_traj))
+
             PathPlanner.saveTrajTxt(proj_traj,matrs,self.lin_traj.text())
+
+            extruder_m = self.ppw.extract_coords_from_stl("source/path_planner/extruder.stl")
+            extruder_mesh = Mesh3D( extruder_m,PrimitiveType.triangles)
+            extruder_mesh.scaleMesh(0.1)
+            extruder_mesh.invertMormals()
+            extruder_mesh.setTransform(matrs[0])
+            glObjExtr = Viewer3D_GL.Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
+            glObjExtr.matrs = matrs
+            self.ppw.paint_objs.append(glObjExtr)
+    
     
     def gl_rot(self):
         if self.ppw.rot:

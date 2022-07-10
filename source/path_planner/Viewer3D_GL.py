@@ -9,7 +9,7 @@ from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint,QPointF, QSize,
         Qt, QTime, QTimer)
 import OpenGL.GL as gl
-from path_planner.polygon import Mesh3D, Point3D,PrimitiveType
+from polygon import Mesh3D, Point3D,PrimitiveType
 
 class Paint_in_GL(object):
     glList = None
@@ -95,6 +95,7 @@ class GLWidget(QOpenGLWidget):
         self.off_x=0.0
         self.off_y=0.0
         self.zoom=100
+
     def initializeGL(self):
         self.setClearColor(self.trolltechPurple)
         gl.glShadeModel(gl.GL_FLAT)
@@ -103,10 +104,10 @@ class GLWidget(QOpenGLWidget):
         
 
         #gl.glEnable(gl.GL_CULL_FACE) 
-        #gl.glEnable(gl.GL_LIGHTING)
-        #gl.glEnable(gl.GL_LIGHT0)
-        lightPower = 1000.
-        lightZeroPosition = [0.,0.,100.,1.]
+        gl.glEnable(gl.GL_LIGHTING)
+        gl.glEnable(gl.GL_LIGHT0)
+        lightPower = 10000.
+        lightZeroPosition = [0.,0.,700.,1.]
         lightZeroColor = [lightPower,lightPower,lightPower,1.0] 
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, lightZeroPosition)
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, lightZeroColor)
@@ -117,15 +118,15 @@ class GLWidget(QOpenGLWidget):
         #gl.glDisable(gl.GL_LIGHT0)
         self.resizeGL(self.w,self.h)
         self.getOpenglInfo()
+
+    
        
     def initPaint_in_GL(self,  paint_gls: Paint_in_GL): 
         mesh_obj = paint_gls.mesh_obj
         if(paint_gls.matrs!=None):
             ind_m = self.render_count % len(paint_gls.matrs)
             mesh_obj = paint_gls.setTrasform(paint_gls.matrs[ind_m])
-        genList = []
-        #gl_list = gl.glGenLists(1)
-        genList.append(gl.glGenLists(1))
+        genList = [gl.glGenLists(1)]
         gl.glNewList(genList[-1], gl.GL_COMPILE)  
         v = paint_gls
         gl.glLineWidth(v.size)
@@ -137,7 +138,7 @@ class GLWidget(QOpenGLWidget):
             gl.glBegin(gl.GL_POINTS)
             len_points = len(v.mesh_obj.polygons)
             for j in range(len_points):  
-                p2 = v.mesh_obj.polygons[j].vert_arr[0] 
+                p1 = v.mesh_obj.polygons[j].vert_arr[0] 
                 gl.glVertex3d(p1.x,p1.y,p1.z)
                 gl.glNormal3d(0.5, 0.5, 0.5)
             gl.glEnd()
@@ -187,8 +188,7 @@ class GLWidget(QOpenGLWidget):
             gl.glDisable(gl.GL_LINE_STIPPLE)  
         
         elif v.obj_type == PrimitiveType.triangles:
-            gl.glEnable(gl.GL_LIGHTING)
-            gl.glEnable(gl.GL_LIGHT0)
+
             gl.glBegin(gl.GL_TRIANGLES)
             
             len_points = len(mesh_obj.polygons)
@@ -204,8 +204,6 @@ class GLWidget(QOpenGLWidget):
                 gl.glVertex3d(p3.x,p3.y,p3.z)
             
             gl.glEnd()
-            gl.glDisable(gl.GL_LIGHTING)
-            gl.glDisable(gl.GL_LIGHT0)  
 
         gl.glEndList()
 
@@ -217,14 +215,16 @@ class GLWidget(QOpenGLWidget):
                 paint_gls[i].glList = self.initPaint_in_GL(paint_gls[i])
             else:
                 for gl_list in paint_gls[i].glList:
+                    if paint_gls[i].obj_type == PrimitiveType.triangles:
+                        gl.glEnable(gl.GL_LIGHTING)
                     gl.glCallList(gl_list)
+                    gl.glDisable(gl.GL_LIGHTING)
 
 
     def paintGL(self):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
         gl.glLoadIdentity()
-        
-        
+     
         gl.glTranslated(self.off_x, self.off_y,-10.)
         gl.glRotated(self.xRot, 1.0, 0.0, 0.0)
         gl.glRotated(self.yRot, 0.0, 1.0, 0.0)
@@ -233,8 +233,9 @@ class GLWidget(QOpenGLWidget):
         self.render_count+=1
 
         self.GL_paint(self.paint_objs)
-
         self.update()
+
+
     def extract_coords_from_stl(self,stl_file):
         result = []
         coords = []
@@ -314,6 +315,7 @@ class GLWidget(QOpenGLWidget):
                 self.zoom*=0.7
         elif wheelcounter.y() > 0:
             self.zoom/=0.7
+
         print(self.zoom)
         self.update()
     
@@ -339,10 +341,9 @@ class GLWidget(QOpenGLWidget):
 
     def toSurfCoord(self,p_widg:QPoint):
         scale = 2/(self.zoom)
-        #print(str(p_widg.x())+" "+str(p_widg.y()))
-        #print(str((p_widg.x()-self.w/2)*scale)+" "+str((p_widg.y()-self.h/2)*scale))
         x = (p_widg.x()-self.w/2)*scale
         y = -(p_widg.y()-self.h/2)*scale
+        
         return QPointF(x,y)
 
     def normalizeAngle(self, angle):
