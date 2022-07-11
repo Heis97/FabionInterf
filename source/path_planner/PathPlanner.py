@@ -641,7 +641,7 @@ def initWind(window:GLWidget):
     extruder_m = window.extract_coords_from_stl("path_planner/extruder.stl")
     extruder_mesh = Mesh3D( extruder_m,PrimitiveType.triangles)
     #extruder_mesh.scaleMesh(0.01)
-    extruder_mesh.invertMormals()
+    extruder_mesh.invertNormals()
     extruder_mesh.setTransform(matrs[0])
     #glObjExtr = Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
     #glObjExtr.matrs = matrs

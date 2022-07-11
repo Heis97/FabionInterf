@@ -77,9 +77,6 @@ class PathPlannerWidg(QtWidgets.QWidget):
         self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(0.5,0.5,0,1,PrimitiveType.triangles,mesh))
         gc.collect()
 
-    
-
-
     def compPlan(self):
         if self.cont!=None and self.surf!=None:
             proj_traj,normal_arr, matrs = PathPlanner.Generate_multiLayer(self.cont, 1.6, np.pi/2, self.surf, 1.3, 0.3, 3, 5)
@@ -91,7 +88,7 @@ class PathPlannerWidg(QtWidgets.QWidget):
             extruder_m = self.ppw.extract_coords_from_stl("source/path_planner/extruder.stl")
             extruder_mesh = Mesh3D( extruder_m,PrimitiveType.triangles)
             extruder_mesh.scaleMesh(0.1)
-            extruder_mesh.invertMormals()
+            extruder_mesh.invertNormals()
             extruder_mesh.setTransform(matrs[0])
             glObjExtr = Viewer3D_GL.Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
             glObjExtr.matrs = matrs
