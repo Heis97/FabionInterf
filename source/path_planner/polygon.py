@@ -3,6 +3,8 @@ import math
 import enum
 from random import triangular
 
+from source.path_planner.flat import Flat3D
+
 
 class PrimitiveType(enum.Enum):
     points = 1
@@ -36,9 +38,16 @@ class Point3D(object):
         return Point3D(self.x,self.y,self.z,self.extrude)
 
     def ToString(self)->str:
-        return str(self.x)+" "+str(self.y)+" "+str(self.z)+" "
+        return str(self.x)+" "+str(self.y)+" "+str(self.z)+";"
 
-    
+    def ToStringArr(arr:"list[Point3D]")->str:
+        ret = ""
+        for i in range(len(arr)):
+            ret+=arr[i].ToString()+"\n"
+        return ret
+
+    def magnitude(self):
+        return (self.x**2 + self.y**2 + self.z**2)**0.5
 
     def __add__(self, other):
         x = self.x + other.x
@@ -63,6 +72,11 @@ class Point3D(object):
             return Point3D(self.y*other.z-self.z*other.y, self.z*other.x-self.x*other.z,self.x*other.y-self.y*other.x,self.extrude)
         else:
             return Point3D(self.x*other,self.y*other,self.z*other,self.extrude)
+
+    def __pow__(self, other):
+        return Point3D(self.x*other.x,self.y*other.y,self.z*other.z,self.extrude)
+
+        
     def matrMul(self,matr:"list[list[float]]"):
 
         x = matr[0][0]*self.x + matr[0][1]*self.y + matr[0][2]*self.z+matr[0][3]
@@ -128,6 +142,7 @@ class Polygon3D(object):
             for i in range(len(self.vert_arr)):
                 self.vert_arr[i]*=other
             return self
+
     def Clone(self):
         vert = []
         norm = self.n.Clone()
@@ -137,11 +152,53 @@ class Polygon3D(object):
         copy.vert_arr = vert
         copy.n = norm
         return copy
+
     def matrMul(self,matr:"list[list[float]]"):
         copy = self.Clone()
         for i in range(len(self.vert_arr)):
              copy.vert_arr[i] = self.vert_arr[i].matrMul(matr)
         return  copy
+
+
+
+    def crossFlat(self,flat:Flat3D):
+        ps = []
+        if len(self.vert_arr)>2:
+            for i in range(len(self.vert_arr)):
+                p_c = self.cross_affil(self.vert_arr[i-2],self.vert_arr[i-1],flat)
+                if p_c!=None:
+                    ps.append(p_c)
+        return ps
+
+    
+
+    def cross_affil(self,p1:Point3D, p2:Point3D,flat:Flat3D ):
+        v = p2 - p1
+        p = p1.Clone()
+        t = (-flat.d-p**flat.abc)/(v**flat.abc)
+
+        p_c = p + v * t
+        if self.affil_segment(p1,p2,p_c)==True:
+            return p_c
+        else:
+            return None
+
+    def cross(self,p1:Point3D, p2:Point3D,flat:Flat3D ):
+        v = p2 - p1
+        p = p1.Clone()
+        t = (-flat.d-p**flat.abc)/(v**flat.abc)
+        return p + v * t
+
+    def affil_segment(self,p_st:Point3D,p_end:Point3D,p_ch:Point3D)->bool:
+        dist_0 = (p_end-p_st).magnitude()
+        dist_1 = (p_ch-p_st).magnitude()
+        dist_2 = (p_ch-p_end).magnitude()
+        if dist_1< dist_0 and dist_2<dist_0:
+            return True
+        return False
+
+    
+
     
 
 class Mesh3D(object):
@@ -178,7 +235,7 @@ class Mesh3D(object):
         for i in range(len(self.polygons)):
             self.polygons[i]*=sc
         return self
-    def invertMormals(self):
+    def invertNormals(self):
         for i in range(len(self.polygons)):
             self.polygons[i].n*=-1
         return self
@@ -220,6 +277,23 @@ class Mesh3D(object):
         f.write(text)
         print(name+" saved stl")
         f.close()
+
+    def find_intersect_triangles(self, flat:Flat3D):
+        ps = []
+        for i in range(len(self.polygons)):
+            ps_pol = self.polygons[i].crossFlat(flat)
+            if len(ps_pol)>0:
+                ps+=ps_pol
+        return ps
+
+
+
+
+
+
+
+
+    
 
         
 

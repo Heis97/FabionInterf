@@ -1,3 +1,4 @@
+from math import dist
 import numpy as np
 import random
 from Viewer3D_GL import PrimitiveType
@@ -216,14 +217,14 @@ def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
 
 
 
-def filResTraj2d(filt:float,traj: "list[Point3D]"):
+def filResTraj2d(filt:float,traj: "list[list[Point3D]]")->"list[Point3D]":
     traj_f = []
-    traj_f.append(traj[0])
-
-    for i in range(1,len(traj)):
-        dist = distance( traj_f[-1],traj[i])
-        if dist>filt:
-            traj_f.append(traj[i])
+    traj_f.append(traj[0][0])
+    for lr in range(len(traj)):
+        for i in range(1,len(traj[lr])):
+            dist = distance( traj_f[-1],traj[lr][i])
+            if dist>filt:
+                traj_f.append(traj[lr][i])
 
     return traj_f
 
@@ -235,14 +236,14 @@ def Generate_multiLayer2d (contour: "list[Point3D]", step: float, alfa: float, a
             alfa2 += np.pi/2
         traj.append(Generate_one_layer_traj (contour, step, alfa2)) 
 
-    return filResTraj2d(step/2,traj)
+    return filResTraj2d(step/2,Trajectory.optimize_tranzitions_2_layer(traj) ) 
 
 
 class Trajectory(object):
     def __init__(self,contour: "list[Point3D]", step: float, alfa: float, amount: int) -> None:
         traj = Generate_multiLayer2d (contour, step, alfa, amount)
 
-    def optimize_tranzitions(self, traj:"list[list[Point3D]]"):
+    def optimize_tranzitions( traj:"list[list[Point3D]]"):
         approach = []
         for i in range(len(traj)):
             s1 = 0
@@ -262,10 +263,155 @@ class Trajectory(object):
                     dists_layer.append(distance(traj[i][approach[i][layer_1][layer_2]],traj[i+1][approach[i][layer_1][layer_2]]))             
                 dists_between.append(dists_layer)
             dists.append(dists_between)
-        
+
         return traj
 
-    def set_layer_direction(self,layer:"list[Point3D]",inds:"list[int]"):
+    def optimize_tranzitions_2_layer(traj:"list[list[Point3D]]"):
+        approach = []
+        for i in range(len(traj)):
+            s1 = 0
+            s2 = 1
+
+            e1 = -1
+            e2 = -2
+            approach.append([[s1,e1],[s2,e2],[e1,s1],[e2,s2]])
+        
+        dists = []
+        
+        
+        for i in range(len(approach)): 
+            b = []
+            for j in range(len(approach[i])):
+                c = [0.]*len(approach[i])
+                b.append(c) 
+            dists.append(b) 
+            #print(dists[i])
+            #print("dists[i]_____________")
+        #print(approach[0])
+        
+        for i in range(len(traj)-1):
+            for layer_1 in range(len(approach[i])):
+                for layer_2 in range(len(approach[i+1])): 
+                    #print(str(i)+" "+str(layer_1)+" "+str(layer_2)+" ")                         
+                    dists[i][layer_1][layer_2] = distance(
+                            traj[i][approach[i][layer_1][1]],
+                        traj[i+1][approach[i][layer_2][0]])    
+                    #print(str(i)+": "+traj[i][approach[i][layer_1][1]].ToString()+"; "+traj[i+1][approach[i][layer_2][0]].ToString()+" "+str(dists[i][layer_1][layer_2]) )
+
+            #print("__________________")
+        
+        fast_way =[]
+        for i in range(len(dists)):
+            if i==0:
+                low,up = Trajectory.find_best_way_first(dists[i])
+                fast_way = [low,up]
+            else:
+                low,up = Trajectory.find_best_way_cont(dists[i],fast_way[-1])
+                fast_way.append(up)
+            #print(dists[i])
+            #print("dists[i]_____________")
+
+        #print(fast_way)
+        print("traj before_____________")
+        Trajectory.comp_trans(traj)
+
+        print("traj after_____________")
+        Trajectory.comp_trans(Trajectory.optimize_trans(traj,approach,fast_way) )
 
 
+
+        return traj
+
+    
+
+    def find_best_way_first(trans_map:"list[list[float]]"):
+        low:int = 0
+        up:int =0
+        min_dist:float = 100000
+        for i in range(len(trans_map)): 
+            for j in range(len(trans_map[i])):
+                if(trans_map[i][j]<min_dist):
+                    min_dist = trans_map[i][j]
+                    low = i
+                    up = j
+        return low,up
+
+    def find_best_way_cont(trans_map:"list[list[float]]",prev_l:int):
+        low:int = prev_l
+        up:int =0
+        min_dist:float = 100000
+        for j in range(len(trans_map[prev_l])):
+            if(trans_map[prev_l][j]<min_dist):
+                min_dist = trans_map[prev_l][j]
+                up = j
+        return low,up
+
+    def optimize_trans(traj:"list[list[Point3D]]",approach:"list[list[int]]",fast_way:"list[int]"):
+        opt_traj = []
+        for i in range(len(traj)):
+
+            opt_traj.append(Trajectory.set_layer_direction(traj[i],approach[i][fast_way[i]]))
+
+        return opt_traj
+
+
+
+    def comp_trans(traj:"list[list[Point3D]]"):
+        trans = []
+        all_tr = 0.
+        for i in range(len(traj)-1):
+            dist = distance(traj[i][-1],traj[i+1][0])
+            trans.append(dist)
+            all_tr+=dist
+        #print(trans )
+        print(all_tr)
+
+
+    def set_layer_direction(layer:"list[Point3D]",inds:"list[int]")->"list[Point3D]":
+        #print(layer[0].ToString()+" "+layer[1].ToString()+" "+layer[-2].ToString()+" "+layer[-1].ToString()+" ")
+        #print(">>>>>>>>>   "+str(inds[0])+"   <<<<<<<<<<<              |||||||||||||||||||||||||||||||")
+        if inds[0] == 0:
+            pass
+        elif inds[0] == -1:
+            layer.reverse()
+
+        elif inds[0] == 1:
+            layer = Trajectory.reverse_line_direct(layer)
+
+            
+        
+        elif inds[0] == -2:
+            layer.reverse()
+            layer = Trajectory.reverse_line_direct(layer)
+
+        #print(layer[0].ToString()+" "+layer[1].ToString()+" "+layer[-2].ToString()+" "+layer[-1].ToString()+" ")
+        #print("________________________________")
+        #print(inds[0])
         return layer
+
+    def reverse_line_direct(layer:"list[Point3D]"):
+        
+        i = 0
+        stop = 0
+        if len(layer) % 2 !=0:
+            stop = 1
+            #print("len(layer) % 2 !=0")
+        while i < len(layer)-stop:
+            lam = layer[i+1].Clone()
+            layer[i+1] = layer[i].Clone()
+            layer[i] = lam.Clone()
+            i+=2
+        
+        return layer
+
+  
+
+
+
+
+if __name__ == "__main__":
+
+    #cont = [Point3D(-20,20,0),Point3D(20,20,0),Point3D(20,-20,0),Point3D(-20,-20,0)]
+    cont = GenerateContour(10,5,3) 
+    traj = Generate_multiLayer2d(cont, 1.3, np.pi/2,  10)
+

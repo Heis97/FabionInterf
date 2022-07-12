@@ -429,6 +429,8 @@ def Generate_multiLayer (contour: "list[Point3D]", step: float, alfa: float, sur
         
     return filResTraj(step/2,proj_traj,normal_arr, matrs)
 
+
+
 #----------------------------------------------------------------------------   
 def pass_array(array, x_w, y_w):
     row_len = len(array)
