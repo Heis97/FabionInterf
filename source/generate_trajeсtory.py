@@ -28,6 +28,13 @@ def convert_to_points3d(tr:list)->"list[Point3D]":
         p3ds.append(Point3D(tr[i][0],tr[i][1],tr[i][2]))
     return p3ds
 
+def convert_to_tr(traj:"list[list[Point3D]]")->"list[Point3D]":
+    tr = []
+    for i in range(len(traj)):
+        for j in range((traj[i])):
+            p3ds.append([traj[i][j].x,traj[i][j].y,traj[i][j].z])
+    return p3ds
+
 def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int):
     f1=open(name,'w')
     N = 5

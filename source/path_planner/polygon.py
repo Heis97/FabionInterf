@@ -3,13 +3,8 @@ import math
 import enum
 from random import triangular
 
-from source.path_planner.flat import Flat3D
 
 
-class PrimitiveType(enum.Enum):
-    points = 1
-    lines = 2
-    triangles = 3
 
 class Point3D(object):
     x:float = 0
@@ -74,8 +69,13 @@ class Point3D(object):
             return Point3D(self.x*other,self.y*other,self.z*other,self.extrude)
 
     def __pow__(self, other):
-        return Point3D(self.x*other.x,self.y*other.y,self.z*other.z,self.extrude)
+        return self.x*other.x +self.y*other.y+self.z*other.z
 
+    def dists_between_ps(ps:"list[Point3D]")->"list[float]":
+        dists= []
+        for i in range(len(ps)-1):
+            dists.append((ps[i]-ps[i+1]).magnitude())
+        return dists
         
     def matrMul(self,matr:"list[list[float]]"):
 
@@ -83,7 +83,25 @@ class Point3D(object):
         y = matr[1][0]*self.x + matr[1][1]*self.y + matr[1][2]*self.z+matr[1][3]
         z = matr[2][0]*self.x + matr[2][1]*self.y + matr[2][2]*self.z+matr[2][3]
         return Point3D(x,y,z,self.extrude)
-    
+
+class Flat3D(object):
+    abc:Point3D
+    d:float
+    def __init__(self,_abc:Point3D,_d:float) -> None:
+        self.abc = _abc
+        self.d = _d
+
+    def compFlat(p1:Point3D,p2:Point3D,p3:Point3D):
+        v1 = p2 - p1
+        v2 = p3 - p1
+        abc = (v1*v2).normalyse()
+        d = -abc**p1
+        return Flat3D(abc,d)
+        
+class PrimitiveType(enum.Enum):
+    points = 1
+    lines = 2
+    triangles = 3 
 
 class Polygon3D(object):
     vert_arr:"list[Point3D] "
@@ -175,6 +193,9 @@ class Polygon3D(object):
     def cross_affil(self,p1:Point3D, p2:Point3D,flat:Flat3D ):
         v = p2 - p1
         p = p1.Clone()
+        #print(flat.d)
+        if v**flat.abc==0:
+            return None
         t = (-flat.d-p**flat.abc)/(v**flat.abc)
 
         p_c = p + v * t
@@ -204,7 +225,6 @@ class Polygon3D(object):
 class Mesh3D(object):
     polygons:"list[Polygon3D]" = []
     primTp:PrimitiveType
-
     def __init__(self,_points:"list[Point3D]"=None, prim_type: PrimitiveType=None):
         self.polygons = []
         self.primTp = prim_type
@@ -231,6 +251,9 @@ class Mesh3D(object):
                     vert_array.append(_points[3*i+2])
                     self.polygons.append(Polygon3D(vert_array))
     
+
+
+
     def scaleMesh(self,sc:float):
         for i in range(len(self.polygons)):
             self.polygons[i]*=sc
@@ -278,13 +301,76 @@ class Mesh3D(object):
         print(name+" saved stl")
         f.close()
 
-    def find_intersect_triangles(self, flat:Flat3D):
+    def find_intersect_triangles(self, flat:Flat3D)->"list[Point3D]":
         ps = []
         for i in range(len(self.polygons)):
             ps_pol = self.polygons[i].crossFlat(flat)
             if len(ps_pol)>0:
                 ps+=ps_pol
-        return ps
+        return self.find_contour(ps) 
+
+    def find_contour(self,ps:"list[Point3D]")->"list[Point3D]":
+        if len(ps)==0:
+            return []
+        cont= [ps[0]]
+        #print(Point3D.dists_between_ps(ps))
+        ps_cut = self.remove_element(ps,0)
+        while(len(ps_cut)>0):
+            min_d = 1000000000000
+            min_ind = 0
+            for j in range(len(ps_cut)):
+                dist = (cont[-1]-ps_cut[j]).magnitude()
+                if dist < min_d:
+                    min_d = dist
+                    min_ind = j
+            #print(min_ind)
+            cont.append(ps_cut[min_ind])
+            ps_cut =  self.remove_element(ps_cut,min_ind)
+        #print(Point3D.dists_between_ps(cont))
+        #print(Point3D.ToStringArr(cont))
+
+        return cont
+
+    def remove_element(self,list_in:list,ind:int):
+        list_r = list_in.copy()
+        del list_r[ind]
+        return list_r
+
+    def reverse_line_direct(layer:"list[Point3D]"):
+        
+        i = 0
+        stop = 0
+        if len(layer) % 2 !=0:
+            stop = 1
+            #print("len(layer) % 2 !=0")
+        while i < len(layer)-stop:
+            lam = layer[i+1].Clone()
+            layer[i+1] = layer[i].Clone()
+            layer[i] = lam.Clone()
+            i+=2        
+        return layer
+
+    def reverse_line_direct_2(self,layer:"list[Point3D]"):       
+        i = 0
+        stop = 0
+        if len(layer) % 2 !=0:
+            stop = 1
+            #print("len(layer) % 2 !=0")
+        half = int(len(layer)/2)
+        while i < half:
+            lam = layer[i+half].Clone()
+            layer[i+half] = layer[i].Clone()
+            layer[i] = lam.Clone()
+            i+=1      
+        return layer
+
+    def blend_list(self,list_in:list):
+        list_bl = list_in.copy()
+        
+
+
+
+
 
 
 

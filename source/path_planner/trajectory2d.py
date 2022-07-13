@@ -3,7 +3,7 @@ import numpy as np
 import random
 from Viewer3D_GL import PrimitiveType
 
-from polygon import Mesh3D, Polygon3D,Point3D
+from polygon import Mesh3D, Polygon3D,Point3D,Mesh3D,Flat3D
 
 
 def distance(p1: Point3D, p2: Point3D):
@@ -155,9 +155,9 @@ def GeneratePositionTrajectory_angle(contour: "list[Point3D]", step: float, alfa
 
 def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
     # нахождение нижней точки
-    y_min:float = 10000.
+    y_min:float = 1000000.
     i_min = 0.
-    y_max:float = -10000.
+    y_max:float = -1000000.
     i_max = 0.
     for i in range(len(contour)):
         if(contour[i].y < y_min):
@@ -176,14 +176,16 @@ def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
         ps = FindPoints_for_line(contour,y)
         if(len(ps)==4) and flagRL == 0:
             p1,p2 = FindCross_for_line(ps,y)
-            traj.append(p2)
-            traj.append(p1)
-            flagRL =1
+            if (p1-p2).magnitude()>0.1:
+                traj.append(p2)
+                traj.append(p1)
+                flagRL =1
         elif(len(ps)==4) and flagRL == 1:
             p1,p2 = FindCross_for_line(ps,y)
-            traj.append(p1)
-            traj.append(p2)
-            flagRL =0
+            if (p1-p2).magnitude()>0.1:
+                traj.append(p1)
+                traj.append(p2)
+                flagRL =0
     
         y+=step
 
@@ -191,10 +193,6 @@ def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
         #print(str(traj[i].x)+" "+str(traj[i].y)+" "+str(traj[i].z)+" ")
     #добавление точки слева
     return traj
-
-def Generate_one_layer_traj (contour: "list[Point3D]", step: float, alfa: float):
-    traj = GeneratePositionTrajectory_angle(contour, step, alfa)
-    return  traj 
 
 
 def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
@@ -214,11 +212,17 @@ def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
     return proj_traj_f,normal_arr_f, matrs_f
         
 
-
+def set_z_layer(layer: "list[Point3D]",z:float):
+    for i in range(len(layer)):
+        layer[i].z = z
+    return layer
 
 
 def filResTraj2d(filt:float,traj: "list[list[Point3D]]")->"list[Point3D]":
     traj_f = []
+    if len(traj)==0:
+        return []
+
     traj_f.append(traj[0][0])
     for lr in range(len(traj)):
         for i in range(1,len(traj[lr])):
@@ -234,9 +238,48 @@ def Generate_multiLayer2d (contour: "list[Point3D]", step: float, alfa: float, a
         alfa2 = alfa
         if i % 2 == 0:
             alfa2 += np.pi/2
-        traj.append(Generate_one_layer_traj (contour, step, alfa2)) 
+        traj.append(GeneratePositionTrajectory_angle (contour, step, alfa2)) 
 
     return filResTraj2d(step/2,Trajectory.optimize_tranzitions_2_layer(traj) ) 
+
+def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", step: float, alfa: float):
+    traj:"list[list[Point3D]]" = []
+    for i in range (len(contour)):
+        alfa2 = alfa
+        if i % 2 == 0:
+            alfa2 += np.pi/2
+        layer = set_z_layer(GeneratePositionTrajectory_angle (contour[i], step, alfa2),z[i])
+       
+        traj.append(layer) 
+
+    traj= Trajectory.optimize_tranzitions_2_layer(traj)
+    for i in range (len(traj)):
+        if i!=len(traj)-1:
+            if len(traj[i])>0:
+                last_pos= traj [i][-1].Clone()
+                last_pos.z = z[i+1]
+                traj[i].append(last_pos)
+
+    return filResTraj2d(step/2,traj) 
+
+def slice_mesh(mesh:Mesh3D,dz:float,step: float, alfa: float):
+    contours = []
+    zs = []
+    len_ps = 1
+    z = dz
+    while len_ps>0:
+        cont = mesh.find_intersect_triangles(Flat3D(Point3D(0,0, 1),-z))
+        
+        len_ps = len(cont)
+        if len_ps>0:
+            print(len_ps)
+            contours.append(cont)
+            zs.append(z)
+            z+=dz
+
+    return Generate_multiLayer2d_mesh(contours, zs, step, alfa)
+
+
 
 
 class Trajectory(object):
@@ -282,7 +325,7 @@ class Trajectory(object):
         for i in range(len(approach)): 
             b = []
             for j in range(len(approach[i])):
-                c = [0.]*len(approach[i])
+                c = [1000000000.]*len(approach[i])
                 b.append(c) 
             dists.append(b) 
             #print(dists[i])
@@ -292,9 +335,10 @@ class Trajectory(object):
         for i in range(len(traj)-1):
             for layer_1 in range(len(approach[i])):
                 for layer_2 in range(len(approach[i+1])): 
-                    #print(str(i)+" "+str(layer_1)+" "+str(layer_2)+" ")                         
-                    dists[i][layer_1][layer_2] = distance(
-                            traj[i][approach[i][layer_1][1]],
+                    #print(str(i)+" "+str(layer_1)+" "+str(layer_2)+" ")  
+                    if traj[i] != None and traj[i+1] != None:              
+                        dists[i][layer_1][layer_2] = distance(
+                        traj[i][approach[i][layer_1][1]],
                         traj[i+1][approach[i][layer_2][0]])    
                     #print(str(i)+": "+traj[i][approach[i][layer_1][1]].ToString()+"; "+traj[i+1][approach[i][layer_2][0]].ToString()+" "+str(dists[i][layer_1][layer_2]) )
 
@@ -360,9 +404,10 @@ class Trajectory(object):
         trans = []
         all_tr = 0.
         for i in range(len(traj)-1):
-            dist = distance(traj[i][-1],traj[i+1][0])
-            trans.append(dist)
-            all_tr+=dist
+            if traj[i] != None and traj[i+1] != None:    
+                dist = distance(traj[i][-1],traj[i+1][0])
+                trans.append(dist)
+                all_tr+=dist
         #print(trans )
         print(all_tr)
 
@@ -376,33 +421,20 @@ class Trajectory(object):
             layer.reverse()
 
         elif inds[0] == 1:
-            layer = Trajectory.reverse_line_direct(layer)
+            layer = Mesh3D.reverse_line_direct(layer)
 
             
         
         elif inds[0] == -2:
             layer.reverse()
-            layer = Trajectory.reverse_line_direct(layer)
+            layer = Mesh3D.reverse_line_direct(layer)
 
         #print(layer[0].ToString()+" "+layer[1].ToString()+" "+layer[-2].ToString()+" "+layer[-1].ToString()+" ")
         #print("________________________________")
         #print(inds[0])
         return layer
 
-    def reverse_line_direct(layer:"list[Point3D]"):
-        
-        i = 0
-        stop = 0
-        if len(layer) % 2 !=0:
-            stop = 1
-            #print("len(layer) % 2 !=0")
-        while i < len(layer)-stop:
-            lam = layer[i+1].Clone()
-            layer[i+1] = layer[i].Clone()
-            layer[i] = lam.Clone()
-            i+=2
-        
-        return layer
+    
 
   
 

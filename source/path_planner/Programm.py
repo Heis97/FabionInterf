@@ -1,8 +1,9 @@
 import numpy as np
 import PathPlanner
 import gc
-from polygon import Mesh3D, Point3D, Polygon3D, PrimitiveType
+from polygon import Mesh3D, Point3D, Polygon3D,Flat3D, PrimitiveType
 import Viewer3D_GL
+from trajectory2d import *
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QPushButton,QSlider, QLineEdit, QOpenGLWidget,QTextEdit,
@@ -22,11 +23,14 @@ class PathPlannerWidg(QtWidgets.QWidget):
         self.cont:"list[Point3D]" = None
         self.surf:Mesh3D = None      
         self.build()
+        self.test_cut()
+
         #PathPlanner.initWind(self.ppw)
     def build(self):
         
         self.ppw = Viewer3D_GL.GLWidget(self)
         self.ppw.setGeometry(QtCore.QRect(200, 0, 1000, 1000))
+        self.ppw.draw_start_frame(10.)
 
         self.but_compPlan = QtWidgets.QPushButton('Рассчитать', self)
         self.but_compPlan.setGeometry(QtCore.QRect(0, 0, 100, 30))
@@ -69,6 +73,20 @@ class PathPlannerWidg(QtWidgets.QWidget):
         self.lin_traj.setText("traj_test_1")
         #self.but1.clicked.connect()
 
+    def test_cut(self):
+        extruder_m = self.ppw.extract_coords_from_stl("source/path_planner/Vkladka (3).stl")
+        #extruder_m = self.ppw.extract_coords_from_stl("source/path_planner/cube30.stl")
+        extruder_mesh = Mesh3D( extruder_m,PrimitiveType.triangles)
+        #extruder_mesh.scaleMesh(3.1)
+        extruder_mesh= extruder_mesh.setTransform([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+        glObjExtr =Viewer3D_GL.Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
+        #self.ppw.paint_objs.append(glObjExtr)
+        ps_intersec = slice_mesh(extruder_mesh, 0.3, 0.4, np.pi/4)
+        mesh_intersec = Mesh3D(ps_intersec,PrimitiveType.lines)
+        self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(1,0,0,0.3,PrimitiveType.lines,mesh_intersec))
+
+
+
     def loadSurf(self):
         m = self.ppw.extract_coords_from_stl("source\\"+self.lin_mod.text())
         mesh = Mesh3D( m,PrimitiveType.triangles)
@@ -102,6 +120,7 @@ class PathPlannerWidg(QtWidgets.QWidget):
         else:
             self.ppw.rot = True
             self.but_gl_rot.setText("Выкл поворот")
+
 
     def gl_trans(self):
         if self.ppw.trans:
