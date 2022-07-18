@@ -1,5 +1,6 @@
 #from socket import *
 import sys
+import struct
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QWidget, QPushButton,QSlider, QLineEdit, QOpenGLWidget,QTextEdit,
     QInputDialog, QApplication,QGridLayout)
@@ -249,6 +250,40 @@ class GLWidget(QOpenGLWidget):
                 result[-1] += vert
                 coords.append(Point3D(vert[0],vert[1],vert[2]))
         return coords
+
+    def unpack (f, sig, l):
+        s = f.read (l)
+        #fb.append(s)
+        return struct.unpack(sig, s)
+
+    def read_triangle(f):
+        n = GLWidget.unpack(f,"<3f", 12)
+        p1 = GLWidget.unpack(f,"<3f", 12)
+        p2 = GLWidget.unpack(f,"<3f", 12)
+        p3 = GLWidget.unpack(f,"<3f", 12)
+        b = GLWidget.unpack(f,"<h", 2)
+
+        #l = len(points)
+        return [Point3D(p1[0], p1[1], p1[2]),Point3D(p2[0], p2[1], p2[2]),Point3D(p3[0], p3[1], p3[2])]
+
+    def read_length(f):
+        length = struct.unpack("@i", f.read(4))
+        return length[0]
+
+    def read_header(f):
+        f.seek(f.tell()+80)
+    def extract_coords_from_stl_bin(stl_file):
+        result = []
+        coords = []
+        op = open(stl_file,"rb")
+        GLWidget.read_header(op)
+        l = GLWidget.read_length(op)
+        for i in range(l):
+            coords+= GLWidget.read_triangle(op)
+        return coords
+
+
+        
     def getOpenglInfo(self):
         
         #print() 

@@ -501,10 +501,10 @@ def empty_ar_k(rows, columns, k):
     for i in range(len(ar)):
         ar[i] = np.array(b)
     return np.array(ar)
-def surface(kernelSize:int = 3): 
+def surface(kernelSize:int = 9): 
     # function for Z values
     def f(x, y):
-        noise = random.uniform(-1,1)
+        noise = random.uniform(-10,10)
         #noise = 0
         vyr =10+0.3*( 0.2*(((x**2)/20) - ((y**2)/4))+0.5*x+noise)
         #vyr  = 10.+0.02*x**2+0.02*y**2

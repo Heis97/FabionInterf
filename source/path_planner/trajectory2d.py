@@ -6,6 +6,11 @@ from Viewer3D_GL import PrimitiveType
 from polygon import Mesh3D, Polygon3D,Point3D,Mesh3D,Flat3D
 
 
+
+
+
+
+
 def distance(p1: Point3D, p2: Point3D):
     dist3 = (p1.x-p2.x)**2+(p1.y-p2.y)**2+(p1.z-p2.z)**2
     return np.sqrt(dist3)
@@ -170,7 +175,7 @@ def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
     p_max = contour[i_max]
     traj = []
     #добавление линии
-    y = p_min.y
+    y = int(p_min.y/step)*step
     flagRL = 0
     while y<p_max.y:
         ps = FindPoints_for_line(contour,y)
@@ -193,6 +198,7 @@ def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
         #print(str(traj[i].x)+" "+str(traj[i].y)+" "+str(traj[i].z)+" ")
     #добавление точки слева
     return traj
+
 
 
 def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
