@@ -370,7 +370,7 @@ def Generate_one_layer_traj (contour: "list[Point3D]", step: float, alfa: float,
     traj = GeneratePositionTrajectory_angle(contour, step, alfa)
     print("GeneratePositionTrajectory Done "+ str(len(traj))+" len")
     div_tr = divideTraj(traj, div_step)
-    fil_tr = divideTraj(div_tr, div_step/2)
+    fil_tr = filterTraj(div_tr, div_step/2)
     print("divideTraj Done")
     mesh_trj = Mesh3D(fil_tr,PrimitiveType.lines)
     print("Mesh3D Done")

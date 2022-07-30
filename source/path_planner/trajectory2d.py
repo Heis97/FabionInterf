@@ -123,7 +123,8 @@ def FindPoints_for_line(contour: "list[Point3D]", y: float):
     ps: list[Point3D]
     ps = []
     for i in range(0, len(contour)):
-        if((y >= contour[i].y and y <contour[i-1].y or (y >= contour[i-1].y and y <contour[i].y))):
+        if((y >= contour[i].y and y <contour[i-1].y) 
+        or (y >= contour[i-1].y and y <contour[i].y)):
             ps.append(contour[i-1] ) 
             ps.append(contour[i] ) 
     #print(len(ps))
