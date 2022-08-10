@@ -44,20 +44,31 @@ class Point3D(object):
     def magnitude(self):
         return (self.x**2 + self.y**2 + self.z**2)**0.5
 
+    def magnitude_xy(self):
+        return (self.x**2 + self.y**2)**0.5
+
     def __add__(self, other):
-        x = self.x + other.x
-        y = self.y + other.y
-        z = self.z + other.z
-        return Point3D(x,y,z,self.extrude)
+
+        xa = self.x + other.x
+        ya = self.y + other.y
+        za = self.z + other.z
+        return Point3D(xa,ya,za,self.extrude)
 
     def __sub__(self, other):
-        x =  self.x- other.x
-        y = self.y - other.y
-        z = self.z - other.z
+
+        xa =  self.x- other.x
+        ya = self.y - other.y
+        za = self.z - other.z
         #self.x-=other.x
         #self.y-=other.y
         #self.z-=other.z
-        return Point3D(x,y,z,self.extrude)
+        return Point3D(xa,ya,za,self.extrude)
+
+    def __neg__(self):
+        self.x = -self.x
+        self.y = -self.y
+        self.z = -self.z
+        return self
 
     def Clone(self):
         return Point3D(self.x,self.y,self.z,self.extrude,self.r,self.g,self.b)
@@ -178,7 +189,6 @@ class Polygon3D(object):
         return  copy
 
 
-
     def crossFlat(self,flat:Flat3D):
         ps = []
         if len(self.vert_arr)>2:
@@ -187,9 +197,7 @@ class Polygon3D(object):
                 if p_c!=None:
                     ps.append(p_c)
         return ps
-
-    
-
+        
     def cross_affil(self,p1:Point3D, p2:Point3D,flat:Flat3D ):
         v = p2 - p1
         p = p1.Clone()
@@ -202,13 +210,7 @@ class Polygon3D(object):
         if self.affil_segment(p1,p2,p_c)==True:
             return p_c
         else:
-            return None
-
-    def cross(self,p1:Point3D, p2:Point3D,flat:Flat3D ):
-        v = p2 - p1
-        p = p1.Clone()
-        t = (-flat.d-p**flat.abc)/(v**flat.abc)
-        return p + v * t
+            return None   
 
     def affil_segment(self,p_st:Point3D,p_end:Point3D,p_ch:Point3D)->bool:
         dist_0 = (p_end-p_st).magnitude()
@@ -218,6 +220,11 @@ class Polygon3D(object):
             return True
         return False
 
+    def cross(self,p1:Point3D, p2:Point3D,flat:Flat3D ):
+        v = p2 - p1
+        p = p1.Clone()
+        t = (-flat.d-p**flat.abc)/(v**flat.abc)
+        return p + v * t
     
 
     

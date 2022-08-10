@@ -2,11 +2,14 @@ from math import dist
 import numpy as np
 import random
 from Viewer3D_GL import PrimitiveType
-
+from enum import  Enum
 from polygon import Mesh3D, Polygon3D,Point3D,Mesh3D,Flat3D
 
 
-
+class Filling_type(Enum):
+    Rectangle_def = 1
+    Rectangle_discr = 2
+    Rectangle_ecv_cont = 3
 
 
 
@@ -19,6 +22,12 @@ def rotate_point(x: float, y: float, alfa: float):
     x_r = x * np.cos(alfa) - y * np.sin(alfa)
     y_r = x * np.sin(alfa) + y * np.cos(alfa)
     return x_r, y_r
+
+def translate_list_points(points: "list[Point3D]", p:Point3D):
+    translated_points = []
+    for i in range(len(points)):       
+        translated_points.append(points[i]+p)
+    return translated_points
 
 def rotate_list_points(points: "list[Point3D]", alfa: float):
     rotated_points = []
@@ -153,13 +162,22 @@ def FindCross_for_line(p: "list[Point3D]" ,y: float):
     p2 = Point3D(x,y,0)
     return p1,p2
             
-def GeneratePositionTrajectory_angle(contour: "list[Point3D]", step: float, alfa: float):
+def GeneratePositionTrajectory_angle(contour: "list[Point3D]", step: float, alfa: float,fil_type:Filling_type):
     contour_rotate = rotate_list_points(contour, alfa)
-    traj = GeneratePositionTrajectory(contour_rotate, step)
-    traJ_rotate = rotate_list_points(traj, -alfa)
-    return traJ_rotate
+    trans = Point3D(10000., 10000., 0.)
+    contour_translate = translate_list_points(contour_rotate,trans)
+    traj,ps_cells = GeneratePositionTrajectory(contour_translate, step,fil_type)
 
-def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
+    traj_translate  = translate_list_points(traj, -trans)
+    ps_cells_translate  = translate_list_points(ps_cells, -trans)
+
+    traj_rotate = rotate_list_points(traj_translate, -alfa)
+    ps_cells_rotate = rotate_list_points(ps_cells_translate, -alfa)
+
+    
+    return traj_rotate ,ps_cells_rotate 
+
+def GeneratePositionTrajectory(contour: "list[Point3D]", step: float,fil_type:Filling_type):
     # нахождение нижней точки
     y_min:float = 1000000.
     i_min = 0.
@@ -177,30 +195,77 @@ def GeneratePositionTrajectory(contour: "list[Point3D]", step: float):
     traj = []
     #добавление линии
     y = int(p_min.y/step)*step
+    ps_cells:"list[Point3D]" = []
     flagRL = 0
-    while y<p_max.y:
+    while y<=p_max.y:
         ps = FindPoints_for_line(contour,y)
-        if(len(ps)==4) and flagRL == 0:
+        if(len(ps)==4):
             p1,p2 = FindCross_for_line(ps,y)
+            if fil_type==Filling_type.Rectangle_discr:
+                p1 = discr_xy(p1, step)
+                p2 = discr_xy(p2, step)
+            ps_cells+=line_cells(p1, p2, step)
             if (p1-p2).magnitude()>0.1:
-                traj.append(p2)
-                traj.append(p1)
-                flagRL =1
-        elif(len(ps)==4) and flagRL == 1:
-            p1,p2 = FindCross_for_line(ps,y)
-            if (p1-p2).magnitude()>0.1:
-                traj.append(p1)
-                traj.append(p2)
-                flagRL =0
+                if flagRL == 0:
+                    traj.append(p2)
+                    traj.append(p1)
+                    flagRL =1
+                else:
+                    traj.append(p1)
+                    traj.append(p2)
+                    flagRL =0
     
         y+=step
 
-    #for i in range(len(traj)):
-        #print(str(traj[i].x)+" "+str(traj[i].y)+" "+str(traj[i].z)+" ")
-    #добавление точки слева
-    return traj
+    return traj,filtr_cells_in_layer_xy(ps_cells,step)
 
+def discr_xy(p:Point3D,step:float):
+    p.x = int(p.x/step)*step
+    p.y = int(p.y/step)*step
+    return p
 
+    
+
+def line_cells(p1: Point3D,p2: Point3D,step: float)->"list[Point3D]":
+    x = []
+    start_x = int(min(p1.x,p2.x)/step)*step 
+    for i in range(int(abs(p1.x-p2.x)/step)):
+        x.append(Point3D((start_x+i*step)+step/2,p1.y+step/2,0))
+        x.append(Point3D((start_x+i*step)+step/2,p1.y-step/2,0))
+    return x
+
+def filtr_cells_in_layer_xy(ps:"list[Point3D]",step:float)->"list[Point3D]":
+    ps_f = []
+    inds = []
+    for i in range(len(ps)):
+        for j in range(i,len(ps)):
+            if((ps[j]-ps[i]).magnitude_xy()<0.001):
+                if not inds.__contains__(j) and i!=j:
+                    ps_f.append(ps[j])
+                    inds.append(j)
+    return ps_f
+
+def filtr_cells_in_z(ps:"list[Point3D]",step:float,dz:float)->"list[Point3D]":
+    ps_f = []
+    ps_z = []
+    inds = []
+    for i in range(len(ps)):
+        ps_f.append([])
+        for j in range(i,len(ps)):
+            if((ps[j]-ps[i]).magnitude_xy()<0.001):
+                if not inds.__contains__(j) and i!=j:
+                    ps_f[i].append(ps[j])
+                    inds.append(j) 
+    for i in range(len(ps_f)):
+        ps_f[i].sort(key=lambda x: x.z)
+        for j in range(1,len(ps_f[i])):
+            if abs((ps_f[i][j].z-ps_f[i][j-1].z)-dz) > 0.1:
+                ps_f[i] = None
+                break
+    for i in range(len(ps_f)):
+        if ps_f[i]!=None:
+            ps_z+=ps_f[i]
+    return ps_z
 
 def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
     proj_traj_f = []
@@ -218,7 +283,6 @@ def filResTraj(filt:float,proj_traj: "list[Point3D]",normal_arr,matrs):
 
     return proj_traj_f,normal_arr_f, matrs_f
         
-
 def set_z_layer(layer: "list[Point3D]",z:float):
     for i in range(len(layer)):
         layer[i].z = z
@@ -245,19 +309,23 @@ def Generate_multiLayer2d (contour: "list[Point3D]", step: float, alfa: float, a
         alfa2 = alfa
         if i % 2 == 0:
             alfa2 += np.pi/2
-        traj.append(GeneratePositionTrajectory_angle (contour, step, alfa2)) 
+        traj.append(GeneratePositionTrajectory_angle (contour, step, alfa2,Filling_type.Rectangle_discr)) 
 
     return filResTraj2d(step/2,Trajectory.optimize_tranzitions_2_layer(traj) ) 
 
 def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", step: float, alfa: float):
     traj:"list[list[Point3D]]" = []
+    cells_all = []
+    
     for i in range (len(contour)):
         alfa2 = alfa
         if i % 2 == 0:
             alfa2 += np.pi/2
-        layer = set_z_layer(GeneratePositionTrajectory_angle (contour[i], step, alfa2),z[i])
-       
+        layer2d,cells2d = GeneratePositionTrajectory_angle (contour[i], step, alfa2,Filling_type.Rectangle_discr)
+        layer = set_z_layer(layer2d,z[i])
+        cells = set_z_layer(cells2d,z[i])
         traj.append(layer) 
+        cells_all+=cells 
 
     traj= Trajectory.optimize_tranzitions_2_layer(traj)
     for i in range (len(traj)):
@@ -267,7 +335,7 @@ def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", 
                 last_pos.z = z[i+1]
                 traj[i].append(last_pos)
 
-    return filResTraj2d(step/2,traj) 
+    return filResTraj2d(step/2,traj),filtr_cells_in_z(cells_all, step,z[0]) 
 
 def slice_mesh(mesh:Mesh3D,dz:float,step: float, alfa: float):
     contours = []

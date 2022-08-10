@@ -83,10 +83,13 @@ class PathPlannerWidg(QtWidgets.QWidget):
         extruder_mesh.scaleMesh(3.1)
         extruder_mesh= extruder_mesh.setTransform([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
         glObjExtr =Viewer3D_GL.Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
-        self.ppw.paint_objs.append(glObjExtr)
-        ps_intersec = slice_mesh(extruder_mesh, 0.3, 0.4, np.pi/4)
+        #self.ppw.paint_objs.append(glObjExtr)
+        ps_intersec,ps_cells = slice_mesh(extruder_mesh, 0.3, 0.4, 0)
         mesh_intersec = Mesh3D(ps_intersec,PrimitiveType.lines)
         self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(1,0,0,0.3,PrimitiveType.lines,mesh_intersec))
+        mesh_cells = Mesh3D(ps_cells,PrimitiveType.points)
+        self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(1,0,0,0.3,PrimitiveType.points,mesh_cells ))
+        
 
 
 
