@@ -77,14 +77,14 @@ class PathPlannerWidg(QtWidgets.QWidget):
 
     def test_cut(self):
         #extruder_m = self.ppw.extract_coords_from_stl("cube_1_ascii.stl")
-        extruder_m = GLWidget.extract_coords_from_stl_bin("cube_1_bin.stl")
+        extruder_m = GLWidget.extract_coords_from_stl_bin("cyl_2_bin.stl")
         #extruder_m = self.ppw.extract_coords_from_stl("source/path_planner/cube30.stl")
         extruder_mesh = Mesh3D( extruder_m,PrimitiveType.triangles)
-        extruder_mesh.scaleMesh(3.1)
-        extruder_mesh= extruder_mesh.setTransform([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
+        #extruder_mesh.scaleMesh(0.5)
+        extruder_mesh= extruder_mesh.setTransform([[1,0,0,0],[0,1,0,0],[0,0,1,-2],[0,0,0,1]])
         glObjExtr =Viewer3D_GL.Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,extruder_mesh)
         #self.ppw.paint_objs.append(glObjExtr)
-        ps_intersec,ps_cells = slice_mesh(extruder_mesh, 0.3, 0.4, 0)
+        ps_intersec,ps_cells = slice_mesh(extruder_mesh, 0.3, 4, 0)
         mesh_intersec = Mesh3D(ps_intersec,PrimitiveType.lines)
         self.ppw.paint_objs.append(Viewer3D_GL.Paint_in_GL(1,0,0,0.3,PrimitiveType.lines,mesh_intersec))
         mesh_cells = Mesh3D(ps_cells,PrimitiveType.points)
