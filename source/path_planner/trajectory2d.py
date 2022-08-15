@@ -1,9 +1,9 @@
 from math import dist
 import numpy as np
 import random
-from Viewer3D_GL import PrimitiveType
+from path_planner.Viewer3D_GL import PrimitiveType
 from enum import  Enum
-from polygon import Mesh3D, Polygon3D,Point3D,Mesh3D,Flat3D
+from path_planner.polygon import Mesh3D, Polygon3D,Point3D,Mesh3D,Flat3D
 
 
 class Filling_type(Enum):
@@ -322,7 +322,7 @@ def Generate_multiLayer2d (contour: "list[Point3D]", step: float, alfa: float, a
 
     return filResTraj2d(step/2,Trajectory.optimize_tranzitions_2_layer(traj) ) 
 
-def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", step: float, alfa: float):
+def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", step: float, alfa: float)->"tuple[list[Point3D],list[Point3D]]":
     traj:"list[list[Point3D]]" = []
     cells_all = []
     for i in range (len(contour)):
@@ -349,7 +349,7 @@ def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", 
     
     return filResTraj2d(0.01,traj),filtr_cells_in_z(cells_all, step,z[0]) 
 
-def slice_mesh(mesh:Mesh3D,dz:float,step: float, alfa: float):
+def slice_mesh(mesh:Mesh3D,dz:float,step: float, alfa: float)->"tuple[list[Point3D],list[Point3D]]":
     contours = []
     zs = []
     len_ps = 1

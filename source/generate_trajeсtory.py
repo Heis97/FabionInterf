@@ -232,7 +232,7 @@ def generate_mesh(tr:list,nx: int,ny: int,d: float,dz: float,nz: int,start_xyz:P
         tr = tr1.copy()
     return tr
 
-def generate_mesh_regemat(tr:list,trajectory_settings:TrajectorySettings, ):
+def generate_mesh_regemat(tr:list,trajectory_settings:TrajectorySettings):
     nx: int = trajectory_settings.nx
     ny: int= trajectory_settings.ny
     d: float= trajectory_settings.d

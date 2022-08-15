@@ -10,7 +10,7 @@ from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint,QPointF, QSize,
         Qt, QTime, QTimer)
 import OpenGL.GL as gl
-from polygon import Mesh3D, Point3D,PrimitiveType
+from path_planner.polygon import Mesh3D, Point3D,PrimitiveType
 
 class Paint_in_GL(object):
     glList = None
@@ -67,6 +67,9 @@ class GLWidget(QOpenGLWidget):
     trans:bool = True
     cont:"list[Point3D]" = None
     render_count = 0
+    lightPower = 1000.
+    lightZeroPosition = [0.,0.,50.,1.]
+    lightZeroColor = [lightPower,lightPower,lightPower,1.0]
     def __init__(self, parent=None):
         super(GLWidget, self).__init__(parent)
         format = self.format()
@@ -107,18 +110,16 @@ class GLWidget(QOpenGLWidget):
         #gl.glEnable(gl.GL_CULL_FACE) 
         gl.glEnable(gl.GL_LIGHTING)
         gl.glEnable(gl.GL_LIGHT0)
-        lightPower = 10000.
-        lightZeroPosition = [0.,0.,700.,1.]
-        lightZeroColor = [lightPower,lightPower,lightPower,1.0] 
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, lightZeroPosition)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, lightZeroColor)
+         
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, self.lightZeroPosition)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, self.lightZeroColor)
         gl.glLightf(gl.GL_LIGHT0, gl.GL_CONSTANT_ATTENUATION, 0.1)
         gl.glLightf(gl.GL_LIGHT0, gl.GL_LINEAR_ATTENUATION, 0.05)
         
         #gl.glDisable(gl.GL_LIGHTING)
         #gl.glDisable(gl.GL_LIGHT0)
         self.resizeGL(self.w,self.h)
-        self.getOpenglInfo()
+        #self.getOpenglInfo()
 
     
        
@@ -218,6 +219,7 @@ class GLWidget(QOpenGLWidget):
                 for gl_list in paint_gls[i].glList:
                     if paint_gls[i].obj_type == PrimitiveType.triangles:
                         gl.glEnable(gl.GL_LIGHTING)
+                        gl.glEnable(gl.GL_LIGHT0)
                     gl.glCallList(gl_list)
                     gl.glDisable(gl.GL_LIGHTING)
 
@@ -433,4 +435,21 @@ class GLWidget(QOpenGLWidget):
         ps.append(p1) 
         ps.append(p1+p4) 
         return ps
+
+    def setLight(self,var:int,val:float):
+        if var == 0:
+            self.lightZeroPosition[0] = val
+        elif var == 1:
+            self.lightZeroPosition[1] = val
+        elif var == 2:
+            self.lightZeroPosition[2] = val
+        elif var == 3:
+            self.lightPower = val
+        print( self.lightPower)
+        gl.glEnable(gl.GL_LIGHT0)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, self.lightZeroPosition)
+        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, [self.lightPower,self.lightPower,self.lightPower,1.0])
+        self.update()
+        self.resizeGL(self.w,self.h)
+
 

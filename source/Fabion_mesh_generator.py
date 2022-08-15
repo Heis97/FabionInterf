@@ -3,19 +3,20 @@ import socket
 import sys
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit,QTextEdit,
-    QInputDialog, QApplication)
+from PyQt5.QtWidgets import (QWidget, QPushButton, QLineEdit,QTextEdit,QSlider,
+    QInputDialog, QApplication,QFileDialog)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtGui import QBrush, QColor, QPainter, QPen, QPolygon
 from PyQt5.QtCore import (pyqtProperty, pyqtSignal, pyqtSlot, QPoint, QSize,
         Qt, QTime, QTimer)
 
-from path_planner.Viewer3D_GL import GLWidget
+from path_planner.Viewer3D_GL import GLWidget,Paint_in_GL
 from generate_trajeсtory import *
 from g_code_parser import *
+from path_planner.trajectory2d import *
 from print_settings import PrintSettings,TrajectorySettings
-
+from path_planner.polygon import Mesh3D, Point3D, Polygon3D,Flat3D, PrimitiveType
 
 class Fabion_mesh_app(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -32,6 +33,9 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.build()
 
     def build(self):
+        self.slider_l_x = QSlider(Qt.Horizontal,self)
+        self.slider_l_x.setGeometry(QtCore.QRect(10, 500, 150, 20))
+        self.slider_l_x.valueChanged.connect(self.update_l_x)
 
         self.viewer3d = GLWidget(self)
         self.viewer3d.setGeometry(QtCore.QRect(550, 10, 600, 600))
@@ -60,6 +64,14 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.but_gen_file = QtWidgets.QPushButton('Генерировать файл', self)
         self.but_gen_file.setGeometry(QtCore.QRect(230, 320, 150, 40))
         self.but_gen_file.clicked.connect(self.gen_file)
+
+        self.but_open_stl = QtWidgets.QPushButton('Открыть модель', self)
+        self.but_open_stl.setGeometry(QtCore.QRect(230, 520, 150, 40))
+        self.but_open_stl.clicked.connect(self.openFileNameDialog)
+
+        self.but_open_stl = QtWidgets.QPushButton('Генерировать траекторию', self)
+        self.but_open_stl.setGeometry(QtCore.QRect(230, 560, 150, 40))
+        self.but_open_stl.clicked.connect(self.gen_traj_from_obj)
 
 
 
@@ -168,6 +180,9 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.label_name.setGeometry(QtCore.QRect(160, 405, 60, 20))
         self.label_name.setText('Name')
 
+    def update_l_x(self,value):
+        self.viewer3d.setLight(3,float(value))
+
     def clear_mesh(self):
         self.prog_code = ""
         self.koord_1 = [[0,0,0,0]]
@@ -229,6 +244,23 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         
         return print_settings, trajectory_settings    
 
+    def openFileNameDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self,"Открыть модель", "","All Files (*);;Python Files (*.py);;STL (*.stl)", options=options)
+        if fileName:
+            model = GLWidget.extract_coords_from_stl_bin(fileName)
+            mesh = Mesh3D( model,PrimitiveType.triangles)
+            glObj = Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,mesh)
+            self.viewer3d.paint_objs.append(glObj)
+            print(fileName)
+
+    def gen_traj_from_obj(self):
+        if len(self.viewer3d.paint_objs)>0:
+            ps_intersec,ps_cells = slice_mesh(self.viewer3d.paint_objs[-1].mesh_obj, 0.3, 4, 0)
+            mesh_intersec = Mesh3D(ps_intersec,PrimitiveType.lines)
+            self.viewer3d.paint_objs.append(Paint_in_GL(1,0,0,0.3,PrimitiveType.lines,mesh_intersec))
+        
     def gen_mesh_regemat(self):
         print_settings, trajectory_settings = self.setSettings()
         self.koord_1 = generate_mesh_regemat([self.koord_1[-1]],trajectory_settings)
