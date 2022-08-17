@@ -64,10 +64,16 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
 
     f1.close()  
 
-def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float)->str:
+def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     code = ";Fabion"
-    
-    F = F*60
+    name: str = print_settings.name
+    Flow: float = print_settings.F 
+    diam: float = print_settings.diam
+    dz: float = print_settings.dz
+    ndoz: int = print_settings.ndoz
+    startE:float = print_settings.startE
+    diam_syr:float = print_settings.diam_syr
+    F = Flow*60
     Diam_syr = 8.6
     cur_z= ' Z'
     safe_z = 50
@@ -87,16 +93,16 @@ def generate_fileGcode(tr: list, name: str, F: float, diam: float, dz: float, nd
     code +=('M302 S0\n')
     code +=('G90\n')
     for i in range(len(tr)):
-        x = tr[i][0]
-        y = tr[i][1]
-        z = tr[i][2]
+        x = tr[i].x
+        y = tr[i].y
+        z = tr[i].z
         if(i==0):
             code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+'\n')
             code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+  '\n')
         else:
-            x_ = tr[i-1][0]
-            y_ = tr[i-1][1]
-            z_ = tr[i-1][2] 
+            x_ = tr[i-1].x
+            y_ = tr[i-1].y
+            z_ = tr[i-1].z
             rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
             v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
             v_all+=v

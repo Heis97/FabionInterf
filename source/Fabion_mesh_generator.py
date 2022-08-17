@@ -37,6 +37,18 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.slider_l_x.setGeometry(QtCore.QRect(10, 500, 150, 20))
         self.slider_l_x.valueChanged.connect(self.update_l_x)
 
+        self.slider_l_y = QSlider(Qt.Horizontal,self)
+        self.slider_l_y.setGeometry(QtCore.QRect(10, 540, 150, 20))
+        self.slider_l_y.valueChanged.connect(self.update_l_y)
+
+        self.slider_l_z = QSlider(Qt.Horizontal,self)
+        self.slider_l_z.setGeometry(QtCore.QRect(10, 580, 150, 20))
+        self.slider_l_z.valueChanged.connect(self.update_l_z)
+
+        self.slider_l_p = QSlider(Qt.Horizontal,self)
+        self.slider_l_p.setGeometry(QtCore.QRect(10, 620, 150, 20))
+        self.slider_l_p.valueChanged.connect(self.update_l_p)
+
         self.viewer3d = GLWidget(self)
         self.viewer3d.setGeometry(QtCore.QRect(550, 10, 600, 600))
         self.viewer3d.draw_start_frame(10.)
@@ -181,14 +193,23 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.label_name.setText('Name')
 
     def update_l_x(self,value):
-        self.viewer3d.setLight(3,float(value))
+        self.viewer3d.setLight(0,float(value))
 
+    def update_l_y(self,value):
+        self.viewer3d.setLight(1,float(value))
+
+    def update_l_z(self,value):
+        self.viewer3d.setLight(2,float(value))
+
+    def update_l_p(self,value):
+        self.viewer3d.setLight(3,float(value))
+    
     def clear_mesh(self):
         self.prog_code = ""
         self.koord_1 = [[0,0,0,0]]
         self.koord_sph = [[0,0,0,0]]
-        self.viewer3d.clear()
-        self.viewer3d.draw_start_frame(10.)
+        self.viewer3d.clear_traj()
+        #self.viewer3d.draw_start_frame(10.)
 
     def clear_mesh_2(self):
         #self.prog_code = ""
@@ -246,20 +267,24 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
     def openFileNameDialog(self):
         options = QFileDialog.Options()
-        options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self,"Открыть модель", "","All Files (*);;Python Files (*.py);;STL (*.stl)", options=options)
+        #options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self,"Открыть модель", "","STL (*.stl);;All Files (*);;Python Files (*.py)", options=options)
         if fileName:
             model = GLWidget.extract_coords_from_stl_bin(fileName)
             mesh = Mesh3D( model,PrimitiveType.triangles)
             glObj = Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,mesh)
             self.viewer3d.paint_objs.append(glObj)
-            print(fileName)
 
     def gen_traj_from_obj(self):
         if len(self.viewer3d.paint_objs)>0:
-            ps_intersec,ps_cells = slice_mesh(self.viewer3d.paint_objs[-1].mesh_obj, 0.3, 4, 0)
-            mesh_intersec = Mesh3D(ps_intersec,PrimitiveType.lines)
-            self.viewer3d.paint_objs.append(Paint_in_GL(1,0,0,0.3,PrimitiveType.lines,mesh_intersec))
+            print_settings, trajectory_settings = self.setSettings()
+            ps_intersec,ps_cells = slice_mesh(self.viewer3d.paint_objs[-1].mesh_obj, trajectory_settings.dz , trajectory_settings.d, 0)
+            self.viewer3d.paint_objs[-1].visible = False
+            #mesh_intersec = Mesh3D(ps_intersec,PrimitiveType.lines)
+            gcode = generate_traj_Fabion(ps_intersec,print_settings)          
+            self.prog_code+=gcode
+            self.addToViewerTraj(parse_g_code(self.prog_code))
+            #self.addToViewerTraj(ps_intersec)
         
     def gen_mesh_regemat(self):
         print_settings, trajectory_settings = self.setSettings()

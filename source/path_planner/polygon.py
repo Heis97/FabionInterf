@@ -135,7 +135,7 @@ class Polygon3D(object):
             u.x * v.y - u.y * v.x)'''
         Norm = u*v
         Norm.normalyse()
-        return Point3D(Norm.x,Norm.y,Norm.z)
+        return Point3D(-Norm.x,-Norm.y,-Norm.z)
     
     def matrMul(self,matr:"list[list[float]]"):
         for i in range(len(self.vert_arr)):
@@ -257,8 +257,6 @@ class Mesh3D(object):
                     vert_array.append(_points[3*i+1])
                     vert_array.append(_points[3*i+2])
                     self.polygons.append(Polygon3D(vert_array))
-    
-
 
 
     def scaleMesh(self,sc:float):

@@ -13,6 +13,7 @@ import OpenGL.GL as gl
 from path_planner.polygon import Mesh3D, Point3D,PrimitiveType
 
 class Paint_in_GL(object):
+    visible = True
     glList = None
     matrs:"list[list[list[float]]]" = None
     red = 0.
@@ -26,7 +27,7 @@ class Paint_in_GL(object):
     p2 = []
     p3 = []
     mesh_obj: Mesh3D = None
-    def __init__(self, _red,  _green,  _blue,_size,_type:PrimitiveType,  _mesh_obj:Mesh3D):
+    def __init__(self, _red, _green, _blue, _size, _type:PrimitiveType, _mesh_obj:Mesh3D):
         self.red = _red
         self.green = _green
         self.blue = _blue
@@ -62,13 +63,14 @@ class Paint_in_GL(object):
         
 class GLWidget(QOpenGLWidget):
     paint_objs:"list[Paint_in_GL]"  = []
+    traj_objs:"list[Paint_in_GL]"  = []
     cont_select:bool = False
     rot:bool = True
     trans:bool = True
     cont:"list[Point3D]" = None
     render_count = 0
-    lightPower = 1000.
-    lightZeroPosition = [0.,0.,50.,1.]
+    lightPower = 20.
+    lightZeroPosition = [400.,400.,400.,1.]
     lightZeroColor = [lightPower,lightPower,lightPower,1.0]
     def __init__(self, parent=None):
         super(GLWidget, self).__init__(parent)
@@ -110,9 +112,11 @@ class GLWidget(QOpenGLWidget):
         #gl.glEnable(gl.GL_CULL_FACE) 
         gl.glEnable(gl.GL_LIGHTING)
         gl.glEnable(gl.GL_LIGHT0)
+        gl.glEnable(gl.GL_COLOR_MATERIAL)
          
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, self.lightZeroPosition)
         gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, self.lightZeroColor)
+        
         gl.glLightf(gl.GL_LIGHT0, gl.GL_CONSTANT_ATTENUATION, 0.1)
         gl.glLightf(gl.GL_LIGHT0, gl.GL_LINEAR_ATTENUATION, 0.05)
         
@@ -122,7 +126,6 @@ class GLWidget(QOpenGLWidget):
         #self.getOpenglInfo()
 
     
-       
     def initPaint_in_GL(self,  paint_gls: Paint_in_GL): 
         mesh_obj = paint_gls.mesh_obj
         if(paint_gls.matrs!=None):
@@ -219,8 +222,10 @@ class GLWidget(QOpenGLWidget):
                 for gl_list in paint_gls[i].glList:
                     if paint_gls[i].obj_type == PrimitiveType.triangles:
                         gl.glEnable(gl.GL_LIGHTING)
-                        gl.glEnable(gl.GL_LIGHT0)
-                    gl.glCallList(gl_list)
+                        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, self.lightZeroPosition)
+                        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, [self.lightPower,self.lightPower,self.lightPower,1.0])
+                    if paint_gls[i].visible==True:
+                        gl.glCallList(gl_list)
                     gl.glDisable(gl.GL_LIGHTING)
 
 
@@ -232,10 +237,15 @@ class GLWidget(QOpenGLWidget):
         gl.glRotated(self.xRot, 1.0, 0.0, 0.0)
         gl.glRotated(self.yRot, 0.0, 1.0, 0.0)
         gl.glRotated(self.zRot, 0.0, 0.0, 1.0)
-        gl.glScalef(self.zoom,self.zoom,self.zoom)
+        #gl.glScalef(self.zoom,self.zoom,self.zoom)
         self.render_count+=1
+        gl.glMatrixMode(gl.GL_PROJECTION)
+        gl.glLoadIdentity()
+        gl.glOrtho(-self.w/ self.zoom ,self.w/  self.zoom , -self.h/  self.zoom , self.h/  self.zoom , -20000., 50000.0)
+        gl.glMatrixMode(gl.GL_MODELVIEW)
 
         self.GL_paint(self.paint_objs)
+        self.GL_paint(self.traj_objs)
         self.update()
 
 
@@ -338,7 +348,7 @@ class GLWidget(QOpenGLWidget):
         scale = 1.
         gl.glMatrixMode(gl.GL_PROJECTION)
         gl.glLoadIdentity()
-        gl.glOrtho(-width/ scale , width/ scale , -height/ scale , height/ scale , -20000., 50000.0)
+        gl.glOrtho(-width/ self.zoom , width/  self.zoom , -height/  self.zoom , height/  self.zoom , -20000., 50000.0)
         
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
@@ -353,7 +363,7 @@ class GLWidget(QOpenGLWidget):
         elif wheelcounter.y() > 0:
             self.zoom/=0.7
 
-        print(self.zoom)
+        #print(self.zoom)
         self.update()
     
     def mousePressEvent(self, event:QMouseEvent):
@@ -398,10 +408,12 @@ class GLWidget(QOpenGLWidget):
 
     def addLines(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float):
         mesh3d_traj = Mesh3D(traj,PrimitiveType.lines)
-        self.paint_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
+        self.traj_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
 
     def clear(self):
         self.paint_objs= []
+    def clear_traj(self):
+        self.traj_objs= []    
 
     def draw_start_frame(self,size:float):
         frame1 = Mesh3D( [Point3D(0, 0, 0,True,0,1,1),Point3D(size, 0, 0,True,0,1,1)] ,PrimitiveType.lines)
@@ -438,18 +450,16 @@ class GLWidget(QOpenGLWidget):
 
     def setLight(self,var:int,val:float):
         if var == 0:
-            self.lightZeroPosition[0] = val
+            self.lightZeroPosition[0] = 5*val
         elif var == 1:
-            self.lightZeroPosition[1] = val
+            self.lightZeroPosition[1] = 5*val
         elif var == 2:
-            self.lightZeroPosition[2] = val
+            self.lightZeroPosition[2] = 5*val
         elif var == 3:
-            self.lightPower = val
-        print( self.lightPower)
-        gl.glEnable(gl.GL_LIGHT0)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, self.lightZeroPosition)
-        gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, [self.lightPower,self.lightPower,self.lightPower,1.0])
-        self.update()
-        self.resizeGL(self.w,self.h)
+            self.lightPower =5* val
+
+        #gl.glEnable(gl.GL_LIGHTING)
+        #gl.glLightfv(gl.GL_LIGHT0, gl.GL_POSITION, self.lightZeroPosition)
+        #gl.glLightfv(gl.GL_LIGHT0, gl.GL_DIFFUSE, [self.lightPower,self.lightPower,self.lightPower,1.0])
 
 
