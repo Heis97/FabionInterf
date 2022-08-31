@@ -231,7 +231,11 @@ def discr_xy(p:Point3D,step:float):
     p.y = round(p.y/step)*step
     return p
 
-    
+def repeat_contour(ps:"list[Point3D]",delt:float)->"list[Point3D]":
+    ps_f = []
+
+
+    return ps_f    
 
 def line_cells(p1: Point3D,p2: Point3D,step: float)->"list[Point3D]":
     x = []
