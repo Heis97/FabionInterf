@@ -24,7 +24,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         # отображался как самостоятельное окно указываем тип окна
         super().__init__(parent, QtCore.Qt.Window)
         self.setWindowTitle("Создание решётки")
-        self.resize(1200, 800)   
+        self.resize(1360, 800)   
         print("1")
         self.koord_1 = [[0,0,0,0]]
         self.koord_2p5d = []
@@ -50,7 +50,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.slider_l_p.valueChanged.connect(self.update_l_p)
 
         self.viewer3d = GLWidget(self)
-        self.viewer3d.setGeometry(QtCore.QRect(550, 10, 600, 600))
+        self.viewer3d.setGeometry(QtCore.QRect(350, 10, 600, 600))
         self.viewer3d.draw_start_frame(10.)
 
         self.but_gen_mesh = QtWidgets.QPushButton('Генерировать решётку', self)
@@ -84,6 +84,10 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.but_open_stl = QtWidgets.QPushButton('Генерировать траекторию', self)
         self.but_open_stl.setGeometry(QtCore.QRect(230, 560, 150, 40))
         self.but_open_stl.clicked.connect(self.gen_traj_from_obj)
+
+        self.but_convert_code = QtWidgets.QPushButton('Конверитровать для Fab', self)
+        self.but_convert_code.setGeometry(QtCore.QRect(920, 620, 150, 40))
+        self.but_convert_code.clicked.connect(self.conv_g_code)
 
 
 
@@ -192,17 +196,13 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.label_name.setGeometry(QtCore.QRect(160, 405, 60, 20))
         self.label_name.setText('Name')
 
-    def update_l_x(self,value):
-        self.viewer3d.setLight(0,float(value))
+        self.box_g_code = QtWidgets.QTextEdit(self)
+        self.box_g_code.setGeometry(QtCore.QRect(850, 10, 500, 600))
+        self.box_g_code.setText('')
 
-    def update_l_y(self,value):
-        self.viewer3d.setLight(1,float(value))
-
-    def update_l_z(self,value):
-        self.viewer3d.setLight(2,float(value))
-
-    def update_l_p(self,value):
-        self.viewer3d.setLight(3,float(value))
+    def conv_g_code(self):
+        g_code = self.box_g_code.toPlainText()
+        generate_file_def(parse_g_code_def(g_code))
     
     def clear_mesh(self):
         self.prog_code = ""
@@ -361,12 +361,23 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             #pass
 
     def addToViewerTraj(self,traj:"list[Point3D]"):    
+        self.box_g_code.setText(self.prog_code)
         self.viewer3d.addLines(traj, 1.0, 0.5, 0.5, 1.)
 
     def addToViewer(self):        
         self.viewer3d.addLines(convert_to_points3d(self.koord_1), 1.0, 0.5, 0.5, 1.)
 
+    def update_l_x(self,value):
+        self.viewer3d.setLight(0,float(value))
 
+    def update_l_y(self,value):
+        self.viewer3d.setLight(1,float(value))
+
+    def update_l_z(self,value):
+        self.viewer3d.setLight(2,float(value))
+
+    def update_l_p(self,value):
+        self.viewer3d.setLight(3,float(value))
 
 
 

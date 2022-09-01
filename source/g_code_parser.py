@@ -14,16 +14,12 @@ def parse_g_code(code:str)->"list[Point3D]":
     com_num = 28
     cur_extr= 0
 
-    for line in lines:
-        
+    for line in lines:        
         coords = line.split()
         if len(coords)>0:
             if coords[0][0]=="G":
                 com_num = int(coords[0][1:])
-                if com_num==0:
-                    p3ds.append(Point3D(x,y,z,False,r,g,b))
-                if com_num==1:
-                    p3ds.append(Point3D(x,y,z,True,r,g,b))
+                
                 
             if coords[0][0]=="T":
                 cur_extr = int(coords[0][1])
@@ -55,9 +51,19 @@ def parse_g_code(code:str)->"list[Point3D]":
                         y = float(coord[1:])
                     if coord[0]=="Z" or coord[0]=="A" or coord[0]=="B":
                         z = float(coord[1:])
-                
             
+            if coords[0][0]=="G":    
+                if com_num==0:
+                    p3ds.append(Point3D(x,y,z,False,r,g,b))
+                if com_num==1:
+                    p3ds.append(Point3D(x,y,z,True,r,g,b))
     return p3ds
+
+
+
+#def parse_val(val:str)->float:
+
+
                     
 
             
