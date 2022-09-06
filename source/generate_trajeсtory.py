@@ -9,6 +9,23 @@ class Current_corner(Enum):
     top_left = 2
     top_right = 3
 
+
+class GCodeFrame(object):
+    x:float = 0
+    y:float = 0
+    z:float = 0
+    e:float = 0
+    f:float = 0
+    com_num:int = 0
+
+    def __init__(self,_com_num,_x,_y,_z,_e,_f):
+        self.x = _x
+        self.y = _y
+        self.z = _z
+        self.e = _e
+        self.f = _f
+        self.com_num = _com_num
+
 def check_corner(x:float,y:float,start_x:float=0,start_y:float=0)-> Current_corner:
     if y==0:
         if x==0:
@@ -29,7 +46,7 @@ def convert_to_points3d(tr:list)->"list[Point3D]":
     return p3ds
 
 def convert_to_tr(traj:"list[list[Point3D]]")->"list[Point3D]":
-    tr = []
+    p3ds = []
     for i in range(len(traj)):
         for j in range((traj[i])):
             p3ds.append([traj[i][j].x,traj[i][j].y,traj[i][j].z])
@@ -63,6 +80,22 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
             N+=5
 
     f1.close()  
+
+def generate_file_def(tr: "list[GCodeFrame]"):
+    f1=open("fab_cod_mesh.cnc",'w')
+    N = 5
+    ndoz = 3
+    for i in range(len(tr)):
+        com_num = tr[i].com_num
+        if com_num == 0:
+            f1.write('N'+str(N)+' G11 X'+str(round(tr[i].x,4))+' Y'+str(round(tr[i].y,4))+' Z'+str(round(tr[i].z,4))+  ' D'+str(ndoz)+'\n')
+            N+=5
+        elif com_num == 1:
+            f1.write('N'+str(N)+' G88 X'+str(round(tr[i].x,4))+' Y'+str(round(tr[i].y,4))+' Z'+str(round(tr[i].z,4))+ ' F'+str(round(tr[i].f/60,4))+ ' V'+str(round(tr[i].e,4))+  ' D'+str(ndoz)+' Q0 T1 I0 J0 \n')
+            N+=5
+    f1.close()
+
+
 
 def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     code = ";Fabion"
@@ -503,4 +536,40 @@ def generate_lines_x(n: int):
 
     return ps
 
+def parse_g_code_def(code:str)->"list[GCodeFrame]":
+    p3ds = []
+    lines = code.split("\n")
+
+    x = 0 
+    y = 0
+    z = 0
+    e = 0
+    f = 0
+    com_num = 0
+
+    for line in lines:        
+        coords = line.split()
+        if len(coords)>0:
+            if coords[0][0]=="G":
+                com_num = int(coords[0][1:])
+                
+            if com_num ==0 or com_num == 1:   
+                for coord in coords:
+                    if coord[0]=="X":
+                        x = float(coord[1:])
+                    if coord[0]=="Y":
+                        y = float(coord[1:])
+                    if coord[0]=="Z":
+                        z = float(coord[1:])
+                    if coord[0]=="E":
+                        e = float(coord[1:])
+                    if coord[0]=="F":
+                        f = float(coord[1:])
+            
+            if coords[0][0]=="G":    
+                if com_num==0 or com_num==1:
+                    #print(com_num)
+                    p3ds.append(GCodeFrame(com_num,x,y,z,e,f))
+
+    return p3ds
 
