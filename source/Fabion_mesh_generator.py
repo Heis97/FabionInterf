@@ -25,12 +25,18 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         super().__init__(parent, QtCore.Qt.Window)
         self.setWindowTitle("Создание решётки")
         self.resize(1360, 800)   
-        print("1")
         self.koord_1 = [[0,0,0,0]]
         self.koord_2p5d = []
         self.koord_sph = [[0,0,0,0]]
         self.prog_code = ""
         self.build()
+        cont = GenerateContour(40, 20, 3)
+        self.viewer3d.addLines(cont, 1, 0, 0, 0.3)
+
+        cont_r = repeat_contour_2d(cont, 3)
+
+        self.viewer3d.addLinesDef(cont_r, 0, 1, 0, 1.3)
+
 
     def build(self):
         self.slider_l_x = QSlider(Qt.Horizontal,self)
@@ -363,6 +369,10 @@ class Fabion_mesh_app(QtWidgets.QWidget):
     def addToViewerTraj(self,traj:"list[Point3D]"):    
         self.box_g_code.setText(self.prog_code)
         self.viewer3d.addLines(traj, 1.0, 0.5, 0.5, 1.)
+
+    def addToViewerCont(self,traj:"list[Point3D]"):    
+        self.viewer3d.addLinesDef(traj, 1.0, 0.5, 0.5, 1.)
+
 
     def addToViewer(self):        
         self.viewer3d.addLines(convert_to_points3d(self.koord_1), 1.0, 0.5, 0.5, 1.)

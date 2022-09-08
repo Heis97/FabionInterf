@@ -1,4 +1,3 @@
-from math import dist
 import numpy as np
 import random
 from path_planner.Viewer3D_GL import PrimitiveType
@@ -19,6 +18,7 @@ def distance(p1: Point3D, p2: Point3D):
     return np.sqrt(dist3)
 
 def rotate_point(x: float, y: float, alfa: float):
+    
     x_r = x * np.cos(alfa) - y * np.sin(alfa)
     y_r = x * np.sin(alfa) + y * np.cos(alfa)
     return x_r, y_r
@@ -234,7 +234,7 @@ def discr_xy(p:Point3D,step:float):
 def repeat_contour_2d(ps:"list[Point3D]",delt:float)->"list[Point3D]":
     lines = comp_eval_lines(ps)
     lines_off= offset_lines(lines, delt)
-    ps_f = intersec_lines(lines)
+    ps_f = intersec_lines(lines_off)
     return ps_f 
 
 def comp_eval_lines(ps:"list[Point3D]")->list:
@@ -243,14 +243,32 @@ def comp_eval_lines(ps:"list[Point3D]")->list:
         lines.append([ps[i-1].x,ps[i-1].y,ps[i].x-ps[i-1].x,ps[i].y-ps[i-1].y])
     return lines 
 
-def offset_lines(lines:list, delt:float)->list:
-    
+def offset_line(x:float,y:float,vx:float,vy:float, delt:float)->list:
+    vx_r,vy_r = rotate_point(vx, vy, -np.pi/2)
+    vlen = (vx_r**2+vy_r**2)**0.5
+    vx_r = vx_r*delt/vlen
+    vy_r = vy_r*delt/vlen
+    return [x+vx_r,y+vy_r,vx,vy]
 
-    return []
+def offset_lines(lines:list, delt:float)->list:
+    lines_off = []
+    for line in lines:
+        lines_off.append(offset_line(line[0],line[1],line[2],line[3], delt))
+    return lines_off
+
+def intersec_2line(line1:list,line2:list)->Point3D:
+    pass
 
 def intersec_lines(lines:list)->"list[Point3D]":
+    ps = []
+    for line in lines:
+        p1 = Point3D(line[0], line[1],0)
+        p2 = Point3D(line[0]+line[2], line[1]+line[3],0)
+        ps.append(p1)
+        ps.append(p2)
+    return ps
 
-    return []
+
 
 def line_cells(p1: Point3D,p2: Point3D,step: float)->"list[Point3D]":
     x = []

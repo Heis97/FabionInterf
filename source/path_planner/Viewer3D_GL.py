@@ -410,6 +410,11 @@ class GLWidget(QOpenGLWidget):
         mesh3d_traj = Mesh3D(traj,PrimitiveType.lines)
         self.traj_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
 
+    def addLinesDef(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float):
+        mesh3d_traj = Mesh3D(traj,PrimitiveType.lines_def)
+        self.traj_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
+
+
     def clear(self):
         self.paint_objs= []
     def clear_traj(self):

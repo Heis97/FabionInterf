@@ -113,6 +113,7 @@ class PrimitiveType(enum.Enum):
     points = 1
     lines = 2
     triangles = 3 
+    lines_def = 4 
 
 class Polygon3D(object):
     vert_arr:"list[Point3D] "
@@ -245,6 +246,13 @@ class Mesh3D(object):
 
             elif (prim_type == PrimitiveType.lines):
                 for i in range (len(_points)-1):
+                    vert_array = []
+                    vert_array.append(_points[i])
+                    vert_array.append(_points[i+1])
+                    self.polygons.append(Polygon3D(vert_array)) 
+
+            elif (prim_type == PrimitiveType.lines_def):
+                for i in range (0,len(_points)-1,2):
                     vert_array = []
                     vert_array.append(_points[i])
                     vert_array.append(_points[i+1])
