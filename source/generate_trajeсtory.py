@@ -84,6 +84,8 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
 def generate_file_def(tr: "list[GCodeFrame]"):
     f1=open("fab_cod_mesh.cnc",'w')
     N = 5
+    f1.write('N'+str(N)+' G90'+'\n')
+    N+=5
     ndoz = 3
     for i in range(len(tr)):
         com_num = tr[i].com_num
@@ -545,9 +547,11 @@ def parse_g_code_def(code:str)->"list[GCodeFrame]":
     z = 0
     e = 0
     f = 0
-    com_num = 0
+    com_num = 3
 
     for line in lines:        
+        print(line)
+        com_num = 3
         coords = line.split()
         if len(coords)>0:
             if coords[0][0]=="G":
