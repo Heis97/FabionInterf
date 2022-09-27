@@ -30,12 +30,12 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.koord_sph = [[0,0,0,0]]
         self.prog_code = ""
         self.build()
-        cont = GenerateContour(40, 20, 3)
-        self.viewer3d.addLines(cont, 1, 0, 0, 0.3)
+        #cont = GenerateContour(40, 20, 3)
+        #self.viewer3d.addLines(cont, 1, 0, 0, 0.3)
 
-        cont_r = repeat_contour_2d(cont, 3)
+        #cont_r = repeat_contour_2d(cont, 3)
 
-        self.viewer3d.addLinesDef(cont_r, 0, 1, 0, 1.3)
+        #self.viewer3d.addLinesDef(cont_r, 0, 1, 0, 1.3)
 
 
     def build(self):
@@ -107,15 +107,15 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_d = QtWidgets.QLineEdit(self)
         self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
-        self.lin_d.setText('2.0')
+        self.lin_d.setText('4.0')
 
         self.lin_dz = QtWidgets.QLineEdit(self)
         self.lin_dz.setGeometry(QtCore.QRect(30, 160, 120, 20))#dZ
-        self.lin_dz.setText('0.25')
+        self.lin_dz.setText('0.8')
 
         self.lin_diam = QtWidgets.QLineEdit(self)
         self.lin_diam.setGeometry(QtCore.QRect(30, 190, 120, 20))#diam
-        self.lin_diam.setText('0.8')
+        self.lin_diam.setText('1.0')
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
@@ -147,7 +147,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_diam_syr = QtWidgets.QLineEdit(self)
         self.lin_diam_syr.setGeometry(QtCore.QRect(30, 370, 120, 20))#diam_syr
-        self.lin_diam_syr.setText('1.75')
+        self.lin_diam_syr.setText('9.1')
 
         self.lin_name = QtWidgets.QLineEdit(self)
         self.lin_name.setGeometry(QtCore.QRect(30, 430, 300, 20))#name
@@ -225,23 +225,11 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.viewer3d.draw_start_frame(10.)
     def gen_mesh(self):
         try:
-            self.koord_1 = generate_mesh(
-                [self.koord_1[-1]],
-                int(self.lin_nx.text()),
-                int(self.lin_ny.text()),
-                float(self.lin_d.text()),
-                float(self.lin_dz.text()),
-                int(self.lin_nz.text()),
-                float(self.lin_startz.text()))
-            gcode = generate_fileGcode(
-                self.koord_1,
-                self.lin_name.text(),
-                float(self.lin_F.text()),
-                float(self.lin_diam.text()),
-                float(self.lin_dz.text()),
-                float(self.lin_ndoz.text()),
-                float(self.lin_startE.text()))
-            
+            print_settings, trajectory_settings = self.setSettings()
+            self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
+
+            gcode = generate_traj_Fabion(self.koord_1, print_settings)
+                
             self.prog_code+=gcode
             #self.clear_mesh_2()
             self.addToViewerTraj(parse_g_code(self.prog_code))            

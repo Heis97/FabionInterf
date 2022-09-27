@@ -132,8 +132,10 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
         y = tr[i].y
         z = tr[i].z
         if(i==0):
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+'\n')
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+  '\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F,5))+'\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' F'+str(round(F,5))+  '\n')
+            code +=('G1 E0.3\n')
+            code +=('G92 E0\n')
         else:
             x_ = tr[i-1].x
             y_ = tr[i-1].y
@@ -145,7 +147,8 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
 
     code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
 
-    code +=(";Volume: "+str(0.058*(v_all-startE))+"cm2"+'\n')    
+    vol_cm3 = 0.058*(v_all-startE)
+    code +=(";Volume: "+str(round(vol_cm3,4))+"cm3"+'\n')    
 
     f1=open(name,'w')
     f1.write(code)
@@ -265,8 +268,13 @@ def generate_fileGcode_regemat(tr: list, print_settings:PrintSettings)->str:
     return code
 
 #d - расстояние между линиями| dz - толщина линии |nx,ny - количество линий по каждой оси
-def generate_mesh(tr:list,nx: int,ny: int,d: float,dz: float,nz: int,start_xyz:Point3D):
-
+def generate_mesh(tr:list,trajectory_settings:TrajectorySettings):
+    nx: int = trajectory_settings.nx
+    ny: int= trajectory_settings.ny
+    d: float= trajectory_settings.d
+    dz: float= trajectory_settings.dz
+    nz: int= trajectory_settings.nz
+    start_xyz:Point3D= trajectory_settings.start_xyz
     tr1 = []
     for i_z in range(int(nz/2)):
         tr1 = generate_2layers(tr,nx,ny,d,dz,start_xyz)   

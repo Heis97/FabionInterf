@@ -367,7 +367,8 @@ def Generate_multiLayer2d_mesh (contour: "list[list[Point3D]]",z:"list[float]", 
         if i % 2 == 0:
             alfa2 += np.pi/2
         if i==0:
-            step_l = 0.6
+            step_l = 1.4
+            alfa2 = np.pi/4
         else:
             step_l = step
         layer2d,cells2d = GeneratePositionTrajectory_angle (contour[i], step_l, alfa2,Filling_type.Rectangle_def)

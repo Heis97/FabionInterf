@@ -271,6 +271,8 @@ class Mesh3D(object):
         for i in range(len(self.polygons)):
             self.polygons[i]*=sc
         return self
+
+    
     def invertNormals(self):
         for i in range(len(self.polygons)):
             self.polygons[i].n*=-1
