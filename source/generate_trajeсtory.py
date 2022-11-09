@@ -87,13 +87,14 @@ def generate_file_def(tr: "list[GCodeFrame]"):
     f1.write('N'+str(N)+' G90'+'\n')
     N+=5
     ndoz = 3
+    k = 0.1
     for i in range(len(tr)):
         com_num = tr[i].com_num
         if com_num == 0:
-            f1.write('N'+str(N)+' G11 X'+str(round(tr[i].x,4))+' Y'+str(round(tr[i].y,4))+' Z'+str(round(tr[i].z,4))+  ' D'+str(ndoz)+'\n')
+            f1.write('N'+str(N)+' G11 X'+str(round(k*tr[i].x,4))+' Y'+str(round(k*tr[i].y,4))+' Z'+str(round(k*tr[i].z,4))+  ' D'+str(ndoz)+'\n')
             N+=5
         elif com_num == 1:
-            f1.write('N'+str(N)+' G88 X'+str(round(tr[i].x,4))+' Y'+str(round(tr[i].y,4))+' Z'+str(round(tr[i].z,4))+ ' F'+str(round(tr[i].f/60,4))+ ' V'+str(round(tr[i].e,4))+  ' D'+str(ndoz)+' Q0 T1 I0 J0 \n')
+            f1.write('N'+str(N)+' G88 X'+str(round(k*tr[i].x,4))+' Y'+str(round(k*tr[i].y,4))+' Z'+str(round(k*tr[i].z,4))+ ' F'+str(round(k*tr[i].f/60,4))+ ' V'+str(round(k*tr[i].e,4))+  ' D'+str(ndoz)+' Q0 T1 I0 J0 \n')
             N+=5
     f1.close()
 
