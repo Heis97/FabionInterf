@@ -266,6 +266,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         if fileName:
             model = GLWidget.extract_coords_from_stl_bin(fileName)
             mesh = Mesh3D( model,PrimitiveType.triangles)
+            #mesh.setTransform(matr)
             glObj = Paint_in_GL(0.2,0.2,0.2,1,PrimitiveType.triangles,mesh)
             self.viewer3d.paint_objs.append(glObj)
 
