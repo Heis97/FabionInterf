@@ -328,7 +328,6 @@ class Mesh3D(object):
         if len(ps)==0:
             return []
         cont= [ps[0]]
-        #print(Point3D.dists_between_ps(ps))
         ps_cut = self.remove_element(ps,0)
         while(len(ps_cut)>0):
             min_d = 1000000000000
@@ -341,9 +340,6 @@ class Mesh3D(object):
             #print(min_ind)
             cont.append(ps_cut[min_ind])
             ps_cut =  self.remove_element(ps_cut,min_ind)
-        #print(Point3D.dists_between_ps(cont))
-        #print(Point3D.ToStringArr(cont))
-
         return cont
 
     def remove_element(self,list_in:list,ind:int):
