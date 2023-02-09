@@ -81,6 +81,46 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
 
     f1.close()  
 
+
+def generate_traj_collag_1(z1:float,trajectory_settings:TrajectorySettings):
+    nx: int = trajectory_settings.nx
+    ny: int= trajectory_settings.ny
+    d: float= trajectory_settings.d
+    dz: float= trajectory_settings.dz
+    nz: int= trajectory_settings.nz
+    start_xyz:Point3D= trajectory_settings.start_xyz
+    a = nx*d
+    b = ny*d
+    traj = []
+    z = z1
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b/2,z))
+    traj.append(Point3D(0,b/2,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(0,0,z))
+    z+=dz/2
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(0,0,z))
+    z+=dz
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(0,0,z))
+    z+=dz
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(0,0,z))
+    z+=dz
+    return Point3D.add_offs(traj, trajectory_settings.start_xyz)
+
 def generate_file_def(tr: "list[GCodeFrame]"):
     f1=open("fab_cod_mesh.cnc",'w')
     N = 5
@@ -110,7 +150,6 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     startE:float = print_settings.startE
     diam_syr:float = print_settings.diam_syr
     F = Flow*60
-    Diam_syr = 8.6
     cur_z= ' Z'
     safe_z = 50
     if ndoz==1:
@@ -135,14 +174,14 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
         if(i==0):
             code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F,5))+'\n')
             code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' F'+str(round(F,5))+  '\n')
-            code +=('G1 E0.3\n')
+            code +=('G1 E0.05\n')
             code +=('G92 E0\n')
         else:
             x_ = tr[i-1].x
             y_ = tr[i-1].y
             z_ = tr[i-1].z
             rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
-            v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
+            v = diam*dz*rasst/(3.141592*(diam_syr/2)**2)
             v_all+=v
             code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
 

@@ -25,7 +25,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         super().__init__(parent, QtCore.Qt.Window)
         self.setWindowTitle("Создание решётки")
         self.resize(1360, 800)   
-        self.koord_1 = [[0,0,0,0]]
+        self.koord_1 = [Point3D(0, 0, 0,False)]
         self.koord_2p5d = []
         self.koord_sph = [[0,0,0,0]]
         self.prog_code = ""
@@ -212,21 +212,35 @@ class Fabion_mesh_app(QtWidgets.QWidget):
     
     def clear_mesh(self):
         self.prog_code = ""
-        self.koord_1 = [[0,0,0,0]]
+        self.koord_1 = [Point3D(0, 0, 0,False)]
         self.koord_sph = [[0,0,0,0]]
         self.viewer3d.clear_traj()
         #self.viewer3d.draw_start_frame(10.)
 
     def clear_mesh_2(self):
         #self.prog_code = ""
-        self.koord_1 = [[0,0,0,0]]
-        self.koord_sph = [[0,0,0,0]]
+        self.koord_1 = [Point3D(0, 0, 0,False)]
+        self.koord_sph =  [[0,0,0,0]]
         self.viewer3d.clear()
         self.viewer3d.draw_start_frame(10.)
+
+    
     def gen_mesh(self):
         try:
             print_settings, trajectory_settings = self.setSettings()
-            self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
+            #self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
+            trajectory_settings.start_xyz = Point3D(0,0,0)
+            trajectory_settings.nx = 10
+            trajectory_settings.ny = 10
+            trajectory_settings.dz = 0.6
+            trajectory_settings.d = 1
+            self.koord_1 += generate_traj_collag_1( 0.3,trajectory_settings)
+            trajectory_settings.nx = 6
+            trajectory_settings.ny = 6
+            trajectory_settings.dz = 0.6
+            trajectory_settings.d = 1
+            trajectory_settings.start_xyz = Point3D(-6.6,0,0)
+            self.koord_1 += generate_traj_collag_1(0.3,trajectory_settings)
 
             gcode = generate_traj_Fabion(self.koord_1, print_settings)
                 
@@ -235,6 +249,8 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             self.addToViewerTraj(parse_g_code(self.prog_code))            
         except BaseException:
             print("Cannot generate mesh")
+
+
 
     def setSettings(self)->"tuple[PrintSettings,TrajectorySettings]":
         print_settings = PrintSettings(
@@ -397,7 +413,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         qp = QPainter()
         qp.begin(self)
         qp.setRenderHint(QPainter.Antialiasing)
-        self.drawLines(qp)
+        #self.drawLines(qp)
         self.update()
     def pointTo25D(self,x:float,y:float,z:float)->"tuple[float,float]":
         x2d:float = 1.732*x-1.732*y

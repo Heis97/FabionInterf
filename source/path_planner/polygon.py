@@ -47,6 +47,11 @@ class Point3D(object):
     def magnitude_xy(self):
         return (self.x**2 + self.y**2)**0.5
 
+    def add_offs(points,offs):
+        for i in range(len(points)):
+            points[i]+=offs
+        return points
+
     def __add__(self, other):
 
         xa = self.x + other.x
