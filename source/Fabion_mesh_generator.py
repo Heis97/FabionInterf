@@ -111,11 +111,11 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_dz = QtWidgets.QLineEdit(self)
         self.lin_dz.setGeometry(QtCore.QRect(30, 160, 120, 20))#dZ
-        self.lin_dz.setText('0.8')
+        self.lin_dz.setText('0.4')
 
         self.lin_diam = QtWidgets.QLineEdit(self)
         self.lin_diam.setGeometry(QtCore.QRect(30, 190, 120, 20))#diam
-        self.lin_diam.setText('1.0')
+        self.lin_diam.setText('0.4')
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
@@ -131,11 +131,11 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_startx = QtWidgets.QLineEdit(self)
         self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startz
-        self.lin_startx.setText('160')
+        self.lin_startx.setText('0')#160
 
         self.lin_starty = QtWidgets.QLineEdit(self)
         self.lin_starty.setGeometry(QtCore.QRect(70, 310, 40, 20))#starty
-        self.lin_starty.setText('50')
+        self.lin_starty.setText('0')#50
 
         self.lin_startz = QtWidgets.QLineEdit(self)
         self.lin_startz.setGeometry(QtCore.QRect(110, 310, 40, 20))#startz
@@ -147,7 +147,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_diam_syr = QtWidgets.QLineEdit(self)
         self.lin_diam_syr.setGeometry(QtCore.QRect(30, 370, 120, 20))#diam_syr
-        self.lin_diam_syr.setText('9.1')
+        self.lin_diam_syr.setText('10.1')
 
         self.lin_name = QtWidgets.QLineEdit(self)
         self.lin_name.setGeometry(QtCore.QRect(30, 430, 300, 20))#name
@@ -226,10 +226,14 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
     
     def gen_mesh(self):
+        
+        
+        
+        
         try:
             print_settings, trajectory_settings = self.setSettings()
             #self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
-            trajectory_settings.start_xyz = Point3D(0,0,0)
+            """trajectory_settings.start_xyz = Point3D(0,0,0)
             trajectory_settings.nx = 10
             trajectory_settings.ny = 10
             trajectory_settings.dz = 0.6
@@ -240,8 +244,9 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             trajectory_settings.dz = 0.6
             trajectory_settings.d = 1
             trajectory_settings.start_xyz = Point3D(-6.6,0,0)
-            self.koord_1 += generate_traj_collag_1(0.3,trajectory_settings)
+            self.koord_1 += generate_traj_collag_1(0.3,trajectory_settings)"""
 
+            self.koord_1 = generate_traj_collag_4( 0.3,trajectory_settings)
             gcode = generate_traj_Fabion(self.koord_1, print_settings)
                 
             self.prog_code+=gcode

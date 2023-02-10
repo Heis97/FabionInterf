@@ -113,13 +113,236 @@ def generate_traj_collag_1(z1:float,trajectory_settings:TrajectorySettings):
     traj.append(Point3D(a,0,z))
     traj.append(Point3D(0,0,z))
     z+=dz
-    traj.append(Point3D(0,0,z))
-    traj.append(Point3D(0,b,z))
-    traj.append(Point3D(a,b,z))
-    traj.append(Point3D(a,0,z))
-    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(0,0,z,False))
+    traj.append(Point3D(0,b,z,False))
+    traj.append(Point3D(a,b,z,False))
+    traj.append(Point3D(a,0,z,False))
+    traj.append(Point3D(0,0,z,False))
     z+=dz
     return Point3D.add_offs(traj, trajectory_settings.start_xyz)
+
+def generate_traj_collag_2(z1:float,trajectory_settings:TrajectorySettings):
+    nx: int = trajectory_settings.nx
+    ny: int= trajectory_settings.ny
+    d: float= trajectory_settings.d
+    dz: float= trajectory_settings.dz
+    nz: int= trajectory_settings.nz
+    start_xyz:Point3D= trajectory_settings.start_xyz
+    a = nx*d
+    b = ny*d
+    traj = []
+    z = z1
+    traj.append(Point3D(0,b/2,z,False))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(0,b/2,z))
+    traj.append(Point3D(a,b/2,z))
+    traj.append(Point3D(a/2,b,z,False))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(0,b/2,z,False))
+    z+=dz
+    traj.append(Point3D(0,b/2,z,False))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(0,b/2,z))
+    traj.append(Point3D(a,b/2,z))
+    traj.append(Point3D(a/2,b,z,False))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(0,b/2,z,False))
+    z+=dz
+    traj.append(Point3D(0,b/2,z,False))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(0,b/2,z))
+    traj.append(Point3D(a,b/2,z))
+    traj.append(Point3D(a/2,b,z,False))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(0,b/2,z,False))
+    z+=dz
+    traj.append(Point3D(0,b/2,z,False))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(0,b/2,z))
+    traj.append(Point3D(a,b/2,z))
+    traj.append(Point3D(a/2,b,z,False))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(0,b/2,z,False))
+
+    
+    return Point3D.add_offs(traj, trajectory_settings.start_xyz)
+
+def generate_traj_collag_3(z1:float,trajectory_settings:TrajectorySettings):
+    nx: int = trajectory_settings.nx
+    ny: int= trajectory_settings.ny
+    d: float= trajectory_settings.d
+    dz: float= trajectory_settings.dz
+    nz: int= trajectory_settings.nz
+    start_xyz:Point3D= trajectory_settings.start_xyz
+    a = nx*d
+    b = ny*d
+    traj = []
+    z = z1
+    traj.append(Point3D(a/2,b,z,False))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(a/2,b,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a/2,0,z))
+    z+=dz
+    traj.append(Point3D(a/2,0,z,False))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(a/2,b,z))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a/2,b,z))
+    z+=dz
+
+    traj.append(Point3D(a/2,b,z,False))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(a/2,b,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a/2,0,z))
+    z+=dz
+    traj.append(Point3D(a/2,0,z,False))
+    traj.append(Point3D(0,0,z))
+    traj.append(Point3D(0,b,z))
+    traj.append(Point3D(a/2,b,z))
+    traj.append(Point3D(a/2,0,z))
+    traj.append(Point3D(a,0,z))
+    traj.append(Point3D(a,b,z))
+    traj.append(Point3D(a/2,b,z))
+    z+=dz
+
+
+    
+
+    
+    return Point3D.add_offs(traj, trajectory_settings.start_xyz)
+
+def set_z_layer(layer: "list[Point3D]",z:float):
+    for i in range(len(layer)):
+        layer[i].z = z
+    return layer
+
+def generate_traj_collag_4(z1:float,trajectory_settings:TrajectorySettings):
+    nx: int = trajectory_settings.nx
+    ny: int= trajectory_settings.ny
+    d: float= trajectory_settings.d
+    dz: float= trajectory_settings.dz
+    nz: int= trajectory_settings.nz
+    start_xyz:Point3D= trajectory_settings.start_xyz
+    a = nx*d
+    b = ny*d
+    traj_all = []
+    traj = []
+    z = z1
+
+    ps = [Point3D(0,0,0),
+    Point3D(0,0,0),Point3D(0,b/2,0),Point3D(0,b,0),
+    Point3D(a/3,0,0),Point3D(0,b/2,0),Point3D(a/3,b,0),
+    Point3D(2*a/3,0,0),Point3D(2*a/3,b/2,0),Point3D(2*a/3,b,0),
+    Point3D(a,0,0),Point3D(a,b/2,0),Point3D(a,b,0)]
+
+    ps_f = [Point3D(0,0,0),
+    Point3D(0,0,0,False),Point3D(0,b/2,0,False),Point3D(0,b,0,False),
+    Point3D(a/3,0,0,False),Point3D(0,b/2,0,False),Point3D(a/3,b,0,False),
+    Point3D(2*a/3,0,0,False),Point3D(2*a/3,b/2,0,False),Point3D(2*a/3,b,0,False),
+    Point3D(a,0,0,False),Point3D(a,b/2,0,False),Point3D(a,b,0,False)]
+
+    traj = []
+    traj.append(ps_f[2].Clone())
+    traj.append(ps[1].Clone())
+    traj.append(ps[10].Clone())
+    traj.append(ps[12].Clone())
+    traj.append(ps[3].Clone())
+    traj.append(ps[2].Clone())
+    traj.append(ps[11].Clone())
+    traj.append(ps_f[7].Clone())
+    traj.append(ps[9].Clone())
+    traj.append(ps_f[6].Clone())
+    traj.append(ps[4].Clone())
+    traj.append(ps_f[2].Clone())
+
+    traj = set_z_layer(traj, z)
+
+    traj_all+=traj   
+    z+=dz
+
+    traj = []
+    traj.append(ps_f[2].Clone())
+    traj.append(ps[1].Clone())
+    traj.append(ps[10].Clone())
+    traj.append(ps[12].Clone())
+    traj.append(ps[3].Clone())
+    traj.append(ps[2].Clone())
+    traj.append(ps[11].Clone())
+    traj.append(ps_f[7].Clone())
+    traj.append(ps[9].Clone())
+    traj.append(ps_f[6].Clone())
+    traj.append(ps[4].Clone())
+    traj.append(ps_f[2].Clone())
+
+    traj = set_z_layer(traj, z)
+
+    traj_all+=traj   
+    z+=dz
+
+    traj = []
+    traj.append(ps_f[2].Clone())
+    traj.append(ps[1].Clone())
+    traj.append(ps[10].Clone())
+    traj.append(ps[12].Clone())
+    traj.append(ps[3].Clone())
+    traj.append(ps[2].Clone())
+    traj.append(ps[11].Clone())
+    traj.append(ps_f[7].Clone())
+    traj.append(ps[9].Clone())
+    traj.append(ps_f[6].Clone())
+    traj.append(ps[4].Clone())
+    traj.append(ps_f[2].Clone())
+
+    traj = set_z_layer(traj, z)
+
+    traj_all+=traj   
+    z+=dz
+
+    traj = []
+    traj.append(ps_f[2].Clone())
+    traj.append(ps[1].Clone())
+    traj.append(ps[10].Clone())
+    traj.append(ps[12].Clone())
+    traj.append(ps[3].Clone())
+    traj.append(ps[2].Clone())
+    traj.append(ps[11].Clone())
+    traj.append(ps_f[7].Clone())
+    traj.append(ps[9].Clone())
+    traj.append(ps_f[6].Clone())
+    traj.append(ps[4].Clone())
+    traj.append(ps_f[2].Clone())
+
+    traj = set_z_layer(traj, z)
+
+    traj_all+=traj   
+    z+=dz
+
+    
+
+    return Point3D.add_offs(traj_all, trajectory_settings.start_xyz)
 
 def generate_file_def(tr: "list[GCodeFrame]"):
     f1=open("fab_cod_mesh.cnc",'w')
@@ -150,6 +373,7 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     startE:float = print_settings.startE
     diam_syr:float = print_settings.diam_syr
     F = Flow*60
+    F_tr = 20*60
     cur_z= ' Z'
     safe_z = 50
     if ndoz==1:
@@ -172,8 +396,8 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
         y = tr[i].y
         z = tr[i].z
         if(i==0):
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F,5))+'\n')
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' F'+str(round(F,5))+  '\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F_tr,5))+'\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' F'+str(round(F_tr,5))+  '\n')
             code +=('G1 E0.05\n')
             code +=('G92 E0\n')
         else:
@@ -183,9 +407,11 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
             rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
             v = diam*dz*rasst/(3.141592*(diam_syr/2)**2)
             v_all+=v
-            code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
-
-    code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
+            if tr[i].extrude is True:
+                code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
+            else:
+                code +=('G0 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F_tr,5))+'\n')
+    code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F_tr,5))+  '\n')
 
     vol_cm3 = 0.058*(v_all-startE)
     code +=(";Volume: "+str(round(vol_cm3,4))+"cm3"+'\n')    
@@ -330,7 +556,8 @@ def generate_mesh_regemat(tr:list,trajectory_settings:TrajectorySettings):
     start_xyz:Point3D= trajectory_settings.start_xyz
     tr1 = []
     for i_z in range(int(nz/2)):
-        tr1 = generate_2layers(tr,nx,ny,d,dz,start_xyz)   
+        tr1 = generate_2layers(tr,nx,ny,d,dz,start_xyz) 
+        print(tr1)  
         tr = tr1.copy()
     return tr
 
@@ -350,154 +577,152 @@ def generate_spher(nx: int,ny: int,d: float,dz: float):
 # a - расстояние между линиями| dz - толщина линии(для сфероидов - высота первого слоя) |nx,ny - количество линий по каждой оси
 # diam - толщина дорожки // F - скорость подачи в мм/с // nz - количество слоёв // ndoz- номер дозатора
 # startz - высота первого слоя при генерации слоя или решётки
-def generate_2layers(tr: list,nx: int,ny: int,d: float,dz: float,start_xyz:Point3D):
+def generate_2layers(tr: list[Point3D],nx: int,ny: int,d: float,dz: float,start_xyz:Point3D):
     Lx = d*nx
     Ly = d*ny
     x = start_xyz.x
     y = start_xyz.y
     z = start_xyz.z
     z+=dz
-    layer = 0
-    if len(tr)==0 or (tr[-1][0]==0 and tr[-1][1]==0 and tr[-1][2]==0):
-        tr = [[x-20,y,z,0],[x,y,z,0]]
+    if len(tr)==0 or (tr[-1].x ==0 and tr[-1].y==0 and tr[-1].z==0):
+        tr = [Point3D(x,y,z)]
         pass
     else:
-        x = tr[-1][0]
-        y = tr[-1][1]
-        z = tr[-1][2]
-        layer =tr[-1][3]+1
+        x = tr[-1].x
+        y = tr[-1].y
+        z = tr[-1].z
     
-    tr.append([x,y,z,layer])
+    tr.append(Point3D(x,y,z))
     if(ny%2==0):
         for i in range(0,int(ny/2)):
 
             x += Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
         
             x -= Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
         x += Lx
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
 
         z+=dz
-        tr.append([x,y,z,layer])
-        layer +=1
+        tr.append(Point3D(x,y,z))
+
         if(nx%2==0):
             for i in range(0,int(nx/2)):
 
                 y -= Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x-=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
             
                 y += Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x-=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
             y -= Ly
-            tr.append([x,y,z,layer]) 
+            tr.append(Point3D(x,y,z))
              
             return tr
         else:
             for i in range(0,int((nx-1)/2)):
 
                 y -= Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x-=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
             
                 y += Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x-=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
             y -= Ly
-            tr.append([x,y,z,layer])   
+            tr.append(Point3D(x,y,z))   
 
             x-=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
             
             y += Ly
-            tr.append([x,y,z,layer]) 
+            tr.append(Point3D(x,y,z)) 
             return tr
     else:
         for i in range(0,int((ny-1)/2)):
 
             x += Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
         
             x -= Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
         x += Lx
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
 
         y+=d
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
     
         x -= Lx
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
 
         z+=dz
-        layer +=1
-        tr.append([x,y,z,layer])
+
+        tr.append(Point3D(x,y,z))
         if(nx%2==0):
             for i in range(0,int(nx/2)):
 
                 y -= Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x+=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
             
                 y += Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x+=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
             y -= Ly
-            tr.append([x,y,z,layer])    
+            tr.append(Point3D(x,y,z))  
             return tr
         else:
             for i in range(0,int((nx-1)/2)):
 
                 y -= Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x+=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
             
                 y += Ly
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
                 x+=d
-                tr.append([x,y,z,layer])
+                tr.append(Point3D(x,y,z))
 
             y -= Ly
-            tr.append([x,y,z,layer])   
+            tr.append(Point3D(x,y,z))  
 
             x+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
             
             y += Ly
-            tr.append([x,y,z,layer]) 
+            tr.append(Point3D(x,y,z)) 
             return tr   
 
 def generate_1layers(tr: list,nx: int,ny: int,d: float,dz: float,start_z:float):
