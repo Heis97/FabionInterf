@@ -189,7 +189,7 @@ def generate_traj_collag_3(z1:float,trajectory_settings:TrajectorySettings):
     a = nx*d
     b = ny*d
     traj = []
-    z = z1
+    z = dz
     traj.append(Point3D(a/2,b,z,False))
     traj.append(Point3D(0,b,z))
     traj.append(Point3D(0,0,z))

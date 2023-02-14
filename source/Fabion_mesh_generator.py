@@ -119,7 +119,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
-        self.lin_F.setText('5')
+        self.lin_F.setText('2')
 
         self.lin_nz = QtWidgets.QLineEdit(self)
         self.lin_nz.setGeometry(QtCore.QRect(30, 250, 120, 20))#nz
@@ -147,7 +147,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_diam_syr = QtWidgets.QLineEdit(self)
         self.lin_diam_syr.setGeometry(QtCore.QRect(30, 370, 120, 20))#diam_syr
-        self.lin_diam_syr.setText('10.1')
+        self.lin_diam_syr.setText('11.1')
 
         self.lin_name = QtWidgets.QLineEdit(self)
         self.lin_name.setGeometry(QtCore.QRect(30, 430, 300, 20))#name
@@ -246,7 +246,17 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             trajectory_settings.start_xyz = Point3D(-6.6,0,0)
             self.koord_1 += generate_traj_collag_1(0.3,trajectory_settings)"""
 
-            self.koord_1 = generate_traj_collag_4( 0.3,trajectory_settings)
+            nx = trajectory_settings.nx
+            ny = trajectory_settings.ny
+            if nx == 2 and ny == 1:
+                self.koord_1 = generate_traj_collag_3   ( 0.3,trajectory_settings)
+            elif nx == 2 and ny == 2:
+                self.koord_1 = generate_traj_collag_2   ( 0.3,trajectory_settings)
+            elif nx == 3 and ny == 2:
+                self.koord_1 = generate_traj_collag_4   ( 0.3,trajectory_settings)
+            else:
+                self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
+                
             gcode = generate_traj_Fabion(self.koord_1, print_settings)
                 
             self.prog_code+=gcode
