@@ -99,11 +99,11 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_nx = QtWidgets.QLineEdit(self)
         self.lin_nx.setGeometry(QtCore.QRect(30, 70, 120, 20))#nx
-        self.lin_nx.setText('10')
+        self.lin_nx.setText('2')
 
         self.lin_ny = QtWidgets.QLineEdit(self)
         self.lin_ny.setGeometry(QtCore.QRect(30, 100, 120, 20))#ny
-        self.lin_ny.setText('10')
+        self.lin_ny.setText('2')
 
         self.lin_d = QtWidgets.QLineEdit(self)
         self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
@@ -226,44 +226,24 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
     
     def gen_mesh(self):
+        print_settings, trajectory_settings = self.setSettings()
+        nx = trajectory_settings.nx
+        ny = trajectory_settings.ny
+        if nx == 2 and ny == 1:
+            self.koord_1 = generate_traj_collag_3   ( 0.3,trajectory_settings)
+        elif nx == 2 and ny == 2:
+            self.koord_1 = generate_traj_collag_2   ( 0.3,trajectory_settings)
+        elif nx == 3 and ny == 2:
+            self.koord_1 = generate_traj_collag_4   ( 0.3,trajectory_settings)
+        else:
+            self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
+            
+        gcode = generate_traj_Fabion(self.koord_1, print_settings)
+            
+        self.prog_code+=gcode
+        #self.clear_mesh_2()
+        self.addToViewerTraj(parse_g_code(self.prog_code))  
         
-        
-        
-        
-        try:
-            print_settings, trajectory_settings = self.setSettings()
-            #self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
-            """trajectory_settings.start_xyz = Point3D(0,0,0)
-            trajectory_settings.nx = 10
-            trajectory_settings.ny = 10
-            trajectory_settings.dz = 0.6
-            trajectory_settings.d = 1
-            self.koord_1 += generate_traj_collag_1( 0.3,trajectory_settings)
-            trajectory_settings.nx = 6
-            trajectory_settings.ny = 6
-            trajectory_settings.dz = 0.6
-            trajectory_settings.d = 1
-            trajectory_settings.start_xyz = Point3D(-6.6,0,0)
-            self.koord_1 += generate_traj_collag_1(0.3,trajectory_settings)"""
-
-            nx = trajectory_settings.nx
-            ny = trajectory_settings.ny
-            if nx == 2 and ny == 1:
-                self.koord_1 = generate_traj_collag_3   ( 0.3,trajectory_settings)
-            elif nx == 2 and ny == 2:
-                self.koord_1 = generate_traj_collag_2   ( 0.3,trajectory_settings)
-            elif nx == 3 and ny == 2:
-                self.koord_1 = generate_traj_collag_4   ( 0.3,trajectory_settings)
-            else:
-                self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
-                
-            gcode = generate_traj_Fabion(self.koord_1, print_settings)
-                
-            self.prog_code+=gcode
-            #self.clear_mesh_2()
-            self.addToViewerTraj(parse_g_code(self.prog_code))            
-        except BaseException:
-            print("Cannot generate mesh")
 
 
 

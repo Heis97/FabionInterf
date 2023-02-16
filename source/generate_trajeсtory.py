@@ -127,11 +127,13 @@ def generate_traj_collag_2(z1:float,trajectory_settings:TrajectorySettings):
     d: float= trajectory_settings.d
     dz: float= trajectory_settings.dz
     nz: int= trajectory_settings.nz
+    
     start_xyz:Point3D= trajectory_settings.start_xyz
     a = nx*d
     b = ny*d
+    d_s = 0.8
     traj = []
-    z = z1
+    z = dz
     traj.append(Point3D(0,b/2,z,False))
     traj.append(Point3D(0,0,z))
     traj.append(Point3D(a,0,z))
@@ -142,6 +144,14 @@ def generate_traj_collag_2(z1:float,trajectory_settings:TrajectorySettings):
     traj.append(Point3D(a/2,b,z,False))
     traj.append(Point3D(a/2,0,z))
     traj.append(Point3D(0,b/2,z,False))
+
+    """traj.append(Point3D(0-d_s,b/2,z,False))
+    traj.append(Point3D(0-d_s,0-d_s,z))
+    traj.append(Point3D(a+d_s,0-d_s,z))
+    traj.append(Point3D(a+d_s,b+d_s,z))
+    traj.append(Point3D(0-d_s,b+d_s,z))
+    traj.append(Point3D(0-d_s,b/2,z))"""
+
     z+=dz
     traj.append(Point3D(0,b/2,z,False))
     traj.append(Point3D(0,0,z))
@@ -153,6 +163,15 @@ def generate_traj_collag_2(z1:float,trajectory_settings:TrajectorySettings):
     traj.append(Point3D(a/2,b,z,False))
     traj.append(Point3D(a/2,0,z))
     traj.append(Point3D(0,b/2,z,False))
+
+    """traj.append(Point3D(0-d_s,b/2,z,False))
+    traj.append(Point3D(0-d_s,0-d_s,z))
+    traj.append(Point3D(a+d_s,0-d_s,z))
+    traj.append(Point3D(a+d_s,b+d_s,z))
+    traj.append(Point3D(0-d_s,b+d_s,z))
+    traj.append(Point3D(0-d_s,b/2,z))"""
+
+
     z+=dz
     traj.append(Point3D(0,b/2,z,False))
     traj.append(Point3D(0,0,z))
