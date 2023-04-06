@@ -92,6 +92,12 @@ class Point3D(object):
         for i in range(len(ps)-1):
             dists.append((ps[i]-ps[i+1]).magnitude())
         return dists
+
+    def ang(v1:"Point3D",v2:"Point3D"):
+        cos = v1**v2/(v1.magnitude()*v2.magnitude())
+        if cos>=1: cos = 1
+        elif cos <=-1: cos = -1
+        return math.acos(cos)
         
     def matrMul(self,matr:"list[list[float]]"):
 

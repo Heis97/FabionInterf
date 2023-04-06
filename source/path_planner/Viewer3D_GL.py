@@ -406,13 +406,19 @@ class GLWidget(QOpenGLWidget):
     def setColor(self, c):
         gl.glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF())  
 
-    def addLines(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float):
+    def addLines(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float,close = False):
+        if close:
+            traj.append(traj[0])
         mesh3d_traj = Mesh3D(traj,PrimitiveType.lines)
         self.traj_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
 
     def addLinesDef(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float):
         mesh3d_traj = Mesh3D(traj,PrimitiveType.lines_def)
         self.traj_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.lines,mesh3d_traj))
+
+    def addPoints(self, traj:"list[Point3D]",r:float,g:float,b:float,size:float):
+        mesh3d_traj = Mesh3D(traj,PrimitiveType.points)
+        self.traj_objs.append(Paint_in_GL(r,g,b,size,PrimitiveType.points,mesh3d_traj))
 
 
     def clear(self):

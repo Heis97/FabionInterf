@@ -9,7 +9,7 @@ class PrintSettings(object):
     ndoz: int = 0
     startE:float = 0
     diam_syr:float = 1.75
-    def __init__(self, _name: str, _F: float, _diam: float, _dz: float, _ndoz: int,_startE:float,_diam_syr:float) -> None:
+    def __init__(self, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float,diam_syr:float) -> None:
         self.name: str = _name
         self.F: float = _F
         self.diam: float = _diam
@@ -25,6 +25,8 @@ class TrajectorySettings(object):
     dz: float = 0.3
     nz: int = 2
     start_xyz:Point3D
+
+    perims:int = 0
     def __init__(self,nx: int,ny: int,d: float,dz: float,nz: int,start_xyz:Point3D) -> None:
         self.nx: int = nx
         self.ny: int = ny

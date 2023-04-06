@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt,acos
 import socket
 import sys
 import time
@@ -30,13 +30,23 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.koord_sph = [[0,0,0,0]]
         self.prog_code = ""
         self.build()
-        #cont = GenerateContour(40, 20, 3)
-        #self.viewer3d.addLines(cont, 1, 0, 0, 0.3)
+        #cont = GenerateContour(40, 20, 6)
+        
+        cont = [Point3D(0, 0, 0),
+        Point3D(100, 0, 0),
+        Point3D(100, 20, 0),
+        Point3D(90, 20, 0),
+        Point3D(90, 10, 0),
+        Point3D(10, 10, 0),
+        Point3D(10, 20, 0),
+        Point3D(0, 20, 0)]
+        cont_r = repeat_contour_2d_step(cont, -3)
+        self.viewer3d.addLines(cont, 1, 0, 0, 0.3,True)
+        self.viewer3d.addLines(cont_r, 0, 1, 0, 1.3,True)
 
-        #cont_r = repeat_contour_2d(cont, 3)
-
-        #self.viewer3d.addLinesDef(cont_r, 0, 1, 0, 1.3)
-
+        """for i in range(0,-40,-3):
+            cont_r = repeat_contour_2d_step(cont, i)
+            self.viewer3d.addLines(cont_r, 0, 1, 0, 1.3,True)"""
 
     def build(self):
         self.slider_l_x = QSlider(Qt.Horizontal,self)
@@ -290,7 +300,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             gcode = generate_traj_Fabion(ps_intersec,print_settings)          
             self.prog_code+=gcode
             self.addToViewerTraj(parse_g_code(self.prog_code))
-            #self.addToViewerTraj(ps_intersec)
+            self.addToViewerPoints(ps_cells)
         
     def gen_mesh_regemat(self):
         print_settings, trajectory_settings = self.setSettings()
@@ -373,6 +383,10 @@ class Fabion_mesh_app(QtWidgets.QWidget):
     def addToViewerCont(self,traj:"list[Point3D]"):    
         self.viewer3d.addLinesDef(traj, 1.0, 0.5, 0.5, 1.)
 
+    def addToViewerPoints(self,traj:"list[Point3D]"):    
+        self.box_g_code.setText(self.prog_code)
+        self.viewer3d.addPoints(traj, 0.0, 0.5, 0.5, 1.)
+
 
     def addToViewer(self):        
         self.viewer3d.addLines(convert_to_points3d(self.koord_1), 1.0, 0.5, 0.5, 1.)
@@ -389,20 +403,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
     def update_l_p(self,value):
         self.viewer3d.setLight(3,float(value))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#----------------------------------------------------------------
 
     def paintEvent(self, e):
         qp = QPainter()

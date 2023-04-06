@@ -237,9 +237,22 @@ def repeat_contour_2d(ps:"list[Point3D]",delt:float)->"list[Point3D]":
     ps_f = intersec_lines(lines_off)
     return ps_f 
 
+def repeat_contour_2d_step(ps:"list[Point3D]",delt:float)->"list[Point3D]":
+    step = 0.1
+    if delt < 0: step = -0.1
+    
+    step_i = abs(int(delt/step))
+    #print(step_i)
+    arr = repeat_contour_2d(ps,step)
+    
+    for i in range(step_i):
+        arr = repeat_contour_2d(arr,step)
+
+    return arr
+
 def comp_eval_lines(ps:"list[Point3D]")->list:
     lines=[]
-    for i in range(1,len(ps)):
+    for i in range(len(ps)):
         lines.append([ps[i-1].x,ps[i-1].y,ps[i].x-ps[i-1].x,ps[i].y-ps[i-1].y])
     return lines 
 
@@ -256,16 +269,74 @@ def offset_lines(lines:list, delt:float)->list:
         lines_off.append(offset_line(line[0],line[1],line[2],line[3], delt))
     return lines_off
 
-def intersec_2line(line1:list,line2:list)->Point3D:
-    pass
+"""
+y = ax+b
+
+x = x1+k*xa1
+y = y1+k*ya1
+
+x = x2+j*xa2
+y = y2+j*ya2
+
+x1+k*xa1 = x2+j*xa2
+y1+k*ya1 = y2+j*ya2
+
+k = (x2+j*xa2-x1)/xa1
+
+y1+ya1*(x2+j*xa2-x1)/xa1 = y2+j*ya2
+
+y1*xa1 + ya1*x2 + ya1*j*xa2 - ya1*x1 = y2*xa1 + j*ya2*xa1
+
+ya1*j*xa2 - j*ya2*xa1 = y2*xa1  - y1*xa1 - ya1*x2 + ya1*x1
+
+(ya1*xa2-ya2*xa1) j = y2*xa1 - y1*xa1 - ya1*x2 + ya1*x1
+j = (y2*xa1 - y1*xa1 - ya1*x2 + ya1*x1)/(ya1*xa2 - ya2*xa1)
+"""
+
+def intersec_2line(line1:list,line2:list):
+    x1 = line1[0]
+    y1 = line1[1]
+    xa1 = line1[2]
+    ya1 = line1[3]
+
+    x2 = line2[0]
+    y2 = line2[1]
+    xa2 = line2[2]
+    ya2 = line2[3]
+
+    if ya1*xa2 - ya2*xa1==0:
+        return 0,0
+
+    j = (y2*xa1 - y1*xa1 - ya1*x2 + ya1*x1)/(ya1*xa2 - ya2*xa1)
+    x = x2+j*xa2
+    y = y2+j*ya2
+
+    return x,y
+
+def intersec_3line(line1:list,line2:list,line3:list):
+    x1,y1= intersec_2line(line1,line2)
+    p1 = Point3D(x1,y1,0)
+    x2,y2= intersec_2line(line2,line3)
+    p2 = Point3D(x2,y2,0)
+    ang = Point3D.ang(p2-p1,Point3D(line2[2], line2[3], 0))
+    return x1,y1,ang
+
+
 
 def intersec_lines(lines:list)->"list[Point3D]":
     ps = []
-    for line in lines:
-        p1 = Point3D(line[0], line[1],0)
-        p2 = Point3D(line[0]+line[2], line[1]+line[3],0)
-        ps.append(p1)
-        ps.append(p2)
+    k= 0
+    for i in range(len(lines)):
+
+        #x,y  = intersec_2line(lines[i-1], lines[i])
+        x,y,ang=intersec_3line(lines[i-2],lines[i-1], lines[i])
+        if ang<0.1:
+
+            ps.append(Point3D(x,y,0))
+        else:
+            k+=1
+
+    #print(k,len(lines),len(ps))
     return ps
 
 
