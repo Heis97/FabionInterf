@@ -10,13 +10,21 @@ class PrintSettings(object):
     startE:float = 0
     diam_syr:float = 1.75
     def __init__(self, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float,diam_syr:float) -> None:
-        self.name: str = _name
-        self.F: float = _F
-        self.diam: float = _diam
-        self.dz: float = _dz
-        self.ndoz: int = _ndoz
-        self.startE:float = _startE
-        self.diam_syr:float = _diam_syr
+        self.name: str = name
+        self.F: float = F
+        self.diam: float = diam
+        self.dz: float = dz
+        self.ndoz: int = self.ndoz_fab_oct(ndoz)
+        self.startE:float = startE
+        self.diam_syr:float = diam_syr
+
+    def ndoz_fab_oct(self,doz:int):
+        if doz==1:
+             return 2
+        elif doz==2:
+             return 0
+        else:
+             return 1
 
 class TrajectorySettings(object):
     nx: int = 2

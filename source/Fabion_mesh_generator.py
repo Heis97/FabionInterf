@@ -32,7 +32,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.build()
         #cont = GenerateContour(40, 20, 6)
         
-        cont = [Point3D(0, 0, 0),
+        """cont = [Point3D(0, 0, 0),
         Point3D(100, 0, 0),
         Point3D(100, 20, 0),
         Point3D(90, 20, 0),
@@ -42,7 +42,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         Point3D(0, 20, 0)]
         cont_r = repeat_contour_2d_step(cont, -3)
         self.viewer3d.addLines(cont, 1, 0, 0, 0.3,True)
-        self.viewer3d.addLines(cont_r, 0, 1, 0, 1.3,True)
+        self.viewer3d.addLines(cont_r, 0, 1, 0, 1.3,True)"""
 
         """for i in range(0,-40,-3):
             cont_r = repeat_contour_2d_step(cont, i)
@@ -101,7 +101,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.but_open_stl.setGeometry(QtCore.QRect(230, 560, 150, 40))
         self.but_open_stl.clicked.connect(self.gen_traj_from_obj)
 
-        self.but_convert_code = QtWidgets.QPushButton('Конверитровать для Fab', self)
+        self.but_convert_code = QtWidgets.QPushButton('Конвертировать для Fabion 2', self)
         self.but_convert_code.setGeometry(QtCore.QRect(920, 620, 150, 40))
         self.but_convert_code.clicked.connect(self.conv_g_code)
 
@@ -109,11 +109,11 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_nx = QtWidgets.QLineEdit(self)
         self.lin_nx.setGeometry(QtCore.QRect(30, 70, 120, 20))#nx
-        self.lin_nx.setText('2')
+        self.lin_nx.setText('4')
 
         self.lin_ny = QtWidgets.QLineEdit(self)
         self.lin_ny.setGeometry(QtCore.QRect(30, 100, 120, 20))#ny
-        self.lin_ny.setText('2')
+        self.lin_ny.setText('4')
 
         self.lin_d = QtWidgets.QLineEdit(self)
         self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
@@ -137,7 +137,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
         self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
-        self.lin_ndoz.setText('3')
+        self.lin_ndoz.setText('2')
 
         self.lin_startx = QtWidgets.QLineEdit(self)
         self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startz
@@ -249,7 +249,6 @@ class Fabion_mesh_app(QtWidgets.QWidget):
             self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
             
         gcode = generate_traj_Fabion(self.koord_1, print_settings)
-            
         self.prog_code+=gcode
         #self.clear_mesh_2()
         self.addToViewerTraj(parse_g_code(self.prog_code))  
@@ -259,7 +258,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
     def setSettings(self)->"tuple[PrintSettings,TrajectorySettings]":
         print_settings = PrintSettings(
-            self.lin_name.text(),
+                self.lin_name.text(),
                 float(self.lin_F.text()),
                 float(self.lin_diam.text()),
                 float(self.lin_dz.text()),

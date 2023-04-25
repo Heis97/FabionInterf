@@ -100,7 +100,7 @@ def generate_traj_collag_1(z1:float,trajectory_settings:TrajectorySettings):
     traj.append(Point3D(0,b,z))
     traj.append(Point3D(a,b,z))
     traj.append(Point3D(0,0,z))
-    z+=dz/2
+    z+=dz
     traj.append(Point3D(0,0,z))
     traj.append(Point3D(0,b,z))
     traj.append(Point3D(a,b,z))
@@ -392,7 +392,7 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     startE:float = print_settings.startE
     diam_syr:float = print_settings.diam_syr
     F = Flow*60
-    F_tr = 20*60
+    F_tr = 15*60
     cur_z= ' Z'
     safe_z = 50
     if ndoz==1:

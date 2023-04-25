@@ -3,7 +3,7 @@
 ; dz0.6
 ; ndoz3.0
 ; startE0.0
-T3
+T0
 G92 E0
 M302 S0
 G90
