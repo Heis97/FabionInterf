@@ -494,7 +494,52 @@ def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndo
     f1.write(code)
     f1.close() 
     return code
+def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
+    name: str = print_settings.name
+    Flow: float = print_settings.F 
+    diam: float = print_settings.diam
+    dz: float = print_settings.dz
+    ndoz: int = print_settings.ndoz
+    startE:float = print_settings.startE
+    diam_syr:float = print_settings.diam_syr
+    code = ""
+    
+    F = Flow*60
+    Diam_syr = diam_syr
+    
+    cur_z= ' Z'
+    safe_z = 20
 
+    v_all = startE
+
+    code +=(
+        'G90 \n'+
+        'G92 E0 \n')
+    for i in range(len(tr)):
+        x = tr[i].x
+        y = tr[i].y
+        z = tr[i].z
+        if(i==0):
+            code +='G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n'
+            code +='G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ '\n'
+
+        else:
+            x_ = tr[i-1].x
+            y_ = tr[i-1].y
+            z_ = tr[i-1].z 
+            rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
+            v = diam*diam*rasst/(3.141592*(Diam_syr/2)**2)
+            v_all+=v
+            code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
+
+    code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
+
+    code +=(";Volume: "+str(0.058*(v_all-startE))+"cm2"+'\n')    
+
+    f1=open(name,'w')
+    f1.write(code)
+    f1.close() 
+    return code
 
 def generate_fileGcode_regemat(tr: list, print_settings:PrintSettings)->str:
     name: str = print_settings.name
