@@ -673,7 +673,6 @@ def generate_2layers(tr: list[Point3D],nx: int,ny: int,d: float,dz: float,start_
             tr.append(Point3D(x,y,z))
         x += Lx
         tr.append(Point3D(x,y,z))
-
         z+=dz
         tr.append(Point3D(x,y,z))
 
@@ -694,7 +693,6 @@ def generate_2layers(tr: list[Point3D],nx: int,ny: int,d: float,dz: float,start_
 
             y -= Ly
             tr.append(Point3D(x,y,z))
-             
             return tr
         else:
             for i in range(0,int((nx-1)/2)):
@@ -719,6 +717,7 @@ def generate_2layers(tr: list[Point3D],nx: int,ny: int,d: float,dz: float,start_
             
             y += Ly
             tr.append(Point3D(x,y,z)) 
+            
             return tr
     else:
         for i in range(0,int((ny-1)/2)):
