@@ -508,7 +508,7 @@ def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
     Diam_syr = diam_syr
     
     cur_z= ' Z'
-    safe_z = 20
+    safe_z = 0.5
 
     v_all = startE
 
@@ -528,7 +528,7 @@ def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
             y_ = tr[i-1].y
             z_ = tr[i-1].z 
             rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
-            v = diam*diam*rasst/(3.141592*(Diam_syr/2)**2)
+            v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
             v_all+=v
             code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
 
