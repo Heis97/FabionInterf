@@ -511,7 +511,7 @@ def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
     safe_z = 0.5
 
     v_all = startE
-
+    e_pre = 2
     code +=(
         'G90 \n'+
         'G92 E0 \n')
@@ -521,7 +521,8 @@ def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
         z = tr[i].z
         if(i==0):
             code +='G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n'
-            code +='G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ '\n'
+            code +='G1 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' E'+str(e_pre)+'\n'
+            code +=('G92 E0 \n')
 
         else:
             x_ = tr[i-1].x
@@ -532,9 +533,10 @@ def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
             v_all+=v
             code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
 
+    code +='G1 '+'E'+str(-e_pre)+'\n'
     code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
 
-    code +=(";Volume: "+str(0.058*(v_all-startE))+"cm2"+'\n')    
+    code +=(";Volume: "+str(0.058*(v_all-startE))+"mm"+'\n')    
 
     f1=open(name,'w')
     f1.write(code)
