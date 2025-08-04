@@ -394,7 +394,7 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     F = Flow*60
     F_tr = 15*60
     cur_z= ' Z'
-    safe_z = 50
+    safe_z = 10
     if ndoz==1:
         cur_z = ' A'
     elif ndoz==2:
@@ -790,67 +790,70 @@ def generate_2layers(tr: list[Point3D],nx: int,ny: int,d: float,dz: float,start_
             tr.append(Point3D(x,y,z)) 
             return tr   
 
-def generate_1layers(tr: list,nx: int,ny: int,d: float,dz: float,start_z:float):
+def generate_1layers(tr: list,trajectory_settings:TrajectorySettings):
     
+    nx: int = trajectory_settings.nx
+    ny: int= trajectory_settings.ny
+    d: float= trajectory_settings.d
+    dz: float= trajectory_settings.dz
+    nz: int= trajectory_settings.nz
+    start_xyz:Point3D= trajectory_settings.start_xyz
     Lx = d*nx
     Ly = d*ny
-    x = 0
-    y = 0
-    z = start_z
     layer = 0
     if len(tr)==0:
         print("len0")
         pass
     else:
-        x = tr[-1][0]
-        y = tr[-1][1]
-        z = tr[-1][2]
+        x = tr[-1].x
+        y = tr[-1].y
+        z = tr[-1].z
         print(x)
         print(y)
         print(z)
-        layer =tr[-1][3]+1
+        layer =tr[-1].z+1
 
     z+=dz
-    tr.append([x,y,z,layer])
+    tr.append(Point3D(x,y,z))
     if(ny%2==0):
         for i in range(0,int(ny/2)):
             x += Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z,False))
         
             x -= Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z,False))
         x += Lx
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
         return tr
         
     else:
         for i in range(0,int((ny-1)/2)):
 
             x += Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z,False))
         
             x -= Lx
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z))
 
             y+=d
-            tr.append([x,y,z,layer])
+            tr.append(Point3D(x,y,z,False))
         x += Lx
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
 
         y+=d
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z,False))
     
         x -= Lx
-        tr.append([x,y,z,layer])
+        tr.append(Point3D(x,y,z))
         return tr 
 
 def generate_begin(tr:list,Lx:float, Ly:float, delt:float):

@@ -323,28 +323,14 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.gen_file()
         
     def gen_layer(self):
-        try:
-            self.koord_1 = generate_1layers(
-                [self.koord_1[-1]],int(self.lin_nx.text()),
-                int(self.lin_ny.text()),
-                float(self.lin_d.text()),
-                float(self.lin_dz.text()),
-                float(self.lin_startz.text())
-                )
-            gcode = generate_fileGcode(
-                self.koord_1,
-                self.lin_name.text(),
-                float(self.lin_F.text()),
-                float(self.lin_diam.text()),
-                float(self.lin_dz.text()),
-                float(self.lin_ndoz.text()),
-                float(self.lin_startE.text()))
-            self.prog_code+=gcode
-            #self.clear_mesh_2()
-            #self.viewer3d.clear()
-            self.addToViewerTraj(parse_g_code(self.prog_code)) 
-        except BaseException:
-            print("Cannot generate layer")
+        #try:
+        print_settings, trajectory_settings = self.setSettings()
+        self.koord_1 = generate_1layers([self.koord_1[-1]],trajectory_settings)
+        gcode = generate_traj_Fabion(self.koord_1, print_settings)
+        self.prog_code+=gcode
+        self.addToViewerTraj(parse_g_code(self.prog_code))   
+        #except BaseException:
+        print("Cannot generate layer")
     def gen_spher(self):
         try:
             self.koord_sph = generate_spher(
