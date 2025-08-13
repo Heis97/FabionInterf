@@ -69,6 +69,10 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.viewer3d.setGeometry(QtCore.QRect(350, 10, 600, 600))
         self.viewer3d.draw_start_frame(10.)
 
+        self.but_gen_mesh = QtWidgets.QPushButton('Генерировать соту', self)
+        self.but_gen_mesh.setGeometry(QtCore.QRect(230, 40, 150, 40))
+        self.but_gen_mesh.clicked.connect(self.gen_honeycomb)
+
         self.but_gen_mesh = QtWidgets.QPushButton('Генерировать решётку', self)
         self.but_gen_mesh.setGeometry(QtCore.QRect(230, 80, 150, 40))
         self.but_gen_mesh.clicked.connect(self.gen_mesh)
@@ -122,27 +126,27 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_d = QtWidgets.QLineEdit(self)
         self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
-        self.lin_d.setText('0.3')
+        self.lin_d.setText('3')
 
         self.lin_dz = QtWidgets.QLineEdit(self)
         self.lin_dz.setGeometry(QtCore.QRect(30, 160, 120, 20))#dZ
-        self.lin_dz.setText('0.1')
+        self.lin_dz.setText('0.4')
 
         self.lin_diam = QtWidgets.QLineEdit(self)
         self.lin_diam.setGeometry(QtCore.QRect(30, 190, 120, 20))#diam
-        self.lin_diam.setText('0.1')
+        self.lin_diam.setText('0.6')
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
-        self.lin_F.setText('0.5')
+        self.lin_F.setText('4')
 
         self.lin_nz = QtWidgets.QLineEdit(self)
         self.lin_nz.setGeometry(QtCore.QRect(30, 250, 120, 20))#nz
-        self.lin_nz.setText('2')
+        self.lin_nz.setText('3')
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
         self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
-        self.lin_ndoz.setText('2')
+        self.lin_ndoz.setText('3')
 
         self.lin_startx = QtWidgets.QLineEdit(self)
         self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startx
@@ -241,6 +245,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
     
     def gen_mesh(self):
+        print("gen_mesh")
         print_settings, trajectory_settings = self.setSettings()
         nx = trajectory_settings.nx
         ny = trajectory_settings.ny
@@ -258,7 +263,14 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         #self.clear_mesh_2()
         self.addToViewerTraj(parse_g_code(self.prog_code))  
         
-
+    def gen_honeycomb(self):
+        print("gen_mesh")
+        print_settings, trajectory_settings = self.setSettings()
+        self.koord_1 = honeycomb_with_hole(trajectory_settings)
+        gcode = generate_traj_Fabion(self.koord_1, print_settings)
+        self.prog_code+=gcode
+        #self.clear_mesh_2()
+        self.addToViewerTraj(parse_g_code(self.prog_code))  
 
 
     def setSettings(self)->"tuple[PrintSettings,TrajectorySettings]":

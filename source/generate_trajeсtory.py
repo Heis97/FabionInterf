@@ -1,5 +1,5 @@
 from path_planner.polygon import Point3D
-from math import sqrt
+import math
 from enum import Enum
 from print_settings import PrintSettings,TrajectorySettings
 
@@ -71,7 +71,7 @@ def generate_file(tr: list, name: str, F: float, diam: float, dz: float, ndoz: i
             x_ = tr[i-1][0]
             y_ = tr[i-1][1]
             z_ = tr[i-1][2] 
-            rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
+            rasst = math.sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
             v = diam*dz*rasst
             f1.write('N'+str(N)+' G88 X'+str(round(x,4))+' Y'+str(round(y,4))+' Z'+str(round(z,4))+ ' F'+str(round(F,4))+ ' V'+str(round(v,4))+  ' D'+str(ndoz)+' Q0 T1 I0 J0 \n')
             N+=5
@@ -253,12 +253,47 @@ def generate_traj_collag_3(z1:float,trajectory_settings:TrajectorySettings):
     
     return Point3D.add_offs(traj, trajectory_settings.start_xyz)
 
+def honeycomb_with_hole(trajectory_settings:TrajectorySettings,direction = -1)->list[Point3D]:
+    z = trajectory_settings.dz
+    traj =[]
+    for i in range(trajectory_settings.nz):
+        traj += one_layer_honeycomb_with_hole(trajectory_settings,z)
+        z+=trajectory_settings.dz
+
+    return traj
+
+def one_layer_honeycomb_with_hole(trajectory_settings:TrajectorySettings,z_cur,_rad_sm = 0.8)->list[Point3D]:
+    rad = trajectory_settings.d
+    rad_sm = _rad_sm
+    p_int = gen_hexagon(rad_sm)
+    p_ext = gen_hexagon(rad)
+    traj = []
+    for i in range(len(p_ext)):
+        traj.append(Point3D(p_ext[i].x,p_ext[i].y,z_cur,False))
+        traj.append(Point3D(p_int[i].x,p_int[i].y,z_cur,True))
+        
+    traj.append(Point3D(p_ext[0].x,p_ext[0].y,z_cur,False))
+    for i in range(1,len(p_ext)):
+        traj.append(Point3D(p_ext[i].x,p_ext[i].y,z_cur,True))
+    traj.append(Point3D(p_ext[0].x,p_ext[0].y,z_cur,True))
+    return traj
+
+def gen_hexagon(rad_sm)->list[Point3D]:
+    p1 = Point3D(rad_sm*math.sin(math.pi/6),rad_sm*math.cos(math.pi/6),1)
+    p2 = Point3D(rad_sm,0,1)
+    p3 = Point3D(rad_sm*math.sin(math.pi/6),-rad_sm*math.cos(math.pi/6),1)
+    p4 = Point3D(-rad_sm*math.sin(math.pi/6),-rad_sm*math.cos(math.pi/6),1)
+    p5 = Point3D(-rad_sm,0,1)
+    p6 = Point3D(-rad_sm*math.sin(math.pi/6),rad_sm*math.cos(math.pi/6),1)
+    return [p1,p2,p3,p4,p5,p6]
+
+
 def set_z_layer(layer: "list[Point3D]",z:float):
     for i in range(len(layer)):
         layer[i].z = z
     return layer
 
-def generate_traj_collag_4(z1:float,trajectory_settings:TrajectorySettings):
+def generate_traj_collag_4(z1:float,trajectory_settings:TrajectorySettings)->list[Point3D]:
     nx: int = trajectory_settings.nx
     ny: int= trajectory_settings.ny
     d: float= trajectory_settings.d
@@ -423,7 +458,7 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
             x_ = tr[i-1].x
             y_ = tr[i-1].y
             z_ = tr[i-1].z
-            rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
+            rasst = math.sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
             v = diam*dz*rasst/(3.141592*(diam_syr/2)**2)
             v_all+=v
             if tr[i].extrude is True:
@@ -528,7 +563,7 @@ def generate_fileGcode_axol_cust(tr: list, print_settings:PrintSettings)->str:
             x_ = tr[i-1].x
             y_ = tr[i-1].y
             z_ = tr[i-1].z 
-            rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
+            rasst = math.sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
             v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
             v_all+=v
             code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
@@ -585,7 +620,7 @@ def generate_fileGcode_regemat(tr: list, print_settings:PrintSettings)->str:
             x_ = tr[i-1][0]
             y_ = tr[i-1][1]
             z_ = tr[i-1][2] 
-            rasst = sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
+            rasst = math.sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
             v = diam*dz*rasst/(3.141592*(Diam_syr/2)**2)
             v_all+=v
             code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v_all,5))+'\n')
