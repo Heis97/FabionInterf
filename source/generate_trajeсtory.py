@@ -254,7 +254,7 @@ def generate_traj_collag_3(z1:float,trajectory_settings:TrajectorySettings):
     return Point3D.add_offs(traj, trajectory_settings.start_xyz)
 
 def honeycomb_with_hole(trajectory_settings:TrajectorySettings,direction = -1)->list[Point3D]:
-    z = trajectory_settings.dz
+    z = float(trajectory_settings.dz)
     traj =[]
     for i in range(trajectory_settings.nz):
         traj += one_layer_honeycomb_with_hole(trajectory_settings,z)
@@ -262,7 +262,7 @@ def honeycomb_with_hole(trajectory_settings:TrajectorySettings,direction = -1)->
 
     return traj
 
-def one_layer_honeycomb_with_hole(trajectory_settings:TrajectorySettings,z_cur,_rad_sm = 0.8)->list[Point3D]:
+def one_layer_honeycomb_with_hole(trajectory_settings:TrajectorySettings,z_cur,_rad_sm = 0.5)->list[Point3D]:
     rad = trajectory_settings.d
     rad_sm = _rad_sm
     p_int = gen_hexagon(rad_sm)
@@ -415,6 +415,64 @@ def generate_file_def(tr: "list[GCodeFrame]"):
             N+=5
     f1.close()
 
+
+def generate_traj_Fabion2(tr: list, print_settings:PrintSettings)->str:
+    code = ";Fabion"
+    name: str = print_settings.name
+    Flow: float = print_settings.F 
+    diam: float = print_settings.diam
+    dz: float = print_settings.dz
+    ndoz: int = print_settings.ndoz
+    startE:float = print_settings.startE
+    diam_syr:float = print_settings.diam_syr
+    F = Flow*60
+    F_tr = 15*60
+    cur_z= ' Z'
+    safe_z = 10
+    if ndoz==1:
+        cur_z = ' A'
+    elif ndoz==2:
+        cur_z = ' B'
+    v_all = startE
+    code += (';'+name+
+    ' F'+str(round(F,4))+
+    '\n; diam'+str(round(diam,4))+
+    '\n; dz'+str(round(dz,4))+
+    '\n; ndoz'+str(round(ndoz,4))+
+    '\n; startE'+str(round(startE,4))+'\n')
+    code +=('T'+str(int(ndoz))+'\n')
+    code +=('G92 E0\n')
+    code +=('M302 S0\n')
+    code +=('G90\n')
+    for i in range(len(tr)):
+        x = tr[i].x
+        y = tr[i].y
+        z = tr[i].z
+        if(i==0):
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F_tr,5))+'\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' F'+str(round(F_tr,5))+  '\n')
+            code +=('G1 E1\n')
+            code +=('G92 E0\n')
+        else:
+            x_ = tr[i-1].x
+            y_ = tr[i-1].y
+            z_ = tr[i-1].z
+            rasst = math.sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
+            v = diam*dz*rasst
+            v_all+=v
+            if tr[i].extrude is True:
+                code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v,5))+'\n')
+            else:
+                code +=('G0 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F_tr,5))+'\n')
+    code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F_tr,5))+  '\n')
+
+    vol_cm3 = 0.058*(v_all-startE)
+    code +=(";Volume: "+str(round(vol_cm3,4))+"cm3"+'\n')    
+
+    f1=open(name,'w')
+    f1.write(code)
+    f1.close() 
+    return code
 
 
 def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:

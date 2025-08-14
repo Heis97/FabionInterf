@@ -1,0 +1,2237 @@
+!axisdef X=0,Y=1,Z=2,U=3,V=4,W=5,A=6,S1=7,S2=8,S3=9,B=10,D=11,C=12,ZOOM=13,PF1=14,PF2=15
+! ______________________________________________________________
+! 00 - ??? X - ??????????? ?? ?????????? X
+! 01 - ??? Y - ??????????? ?? ?????????? Y
+! 02 - ??? Z - ??????????? ?? Z ?????? 1
+! 03 - ??? U - ??????????? ?? Z ?????? 2
+! 04 - ??? V - ??????????? ?? Z ?????? 3
+! 05 - ??? W - ??????????? ?? Z ???????????
+! 06 - ??? A - ??????????? ?? Z ????????
+! 07 - ??? S1 - ????????????/?????????? ??????? 1
+! 08 - ??? S2 - ????????????/?????????? ??????? 2
+! 09 - ??? S3 - ????????????/?????????? ??????? 3
+! 10 - ??? B - ??????????? ??????? ?????? ?? ??? X
+! 11 - ??? D - ??????????? ??????? ?????? ?? ??? Y
+! 12 - ??? C - ??????????? ??????? ?????? ?? ??? X
+! 13 - ??? ZOOM - ???????????/????????
+! 14 - ??? PF1 - ????????????/?????????? ????????? 1 ??????????
+! 15 - ??? PF2 - ????????????/?????????? ????????? 2 ??????????
+!_______________________________________________________________
+
+!axisdef x=0,y=1,z=2,t=3,a=4,b=5,c=6,d=7
+!global int I(100),I0,I1,I2,I3,I4,I5,I6,I7,I8,I9,I90,I91,I92,I93,I94,I95,I96,I97,I98,I99
+!global real V(100),V0,V1,V2,V3,V4,V5,V6,V7,V8,V9,V90,V91,V92,V93,V94,V95,V96,V97,V98,V99
+
+! S1Diameter - ??????? ?????? 1
+! S2Diameter - ??????? ?????? 2
+! S3Diameter - ??????? ?????? 3
+! PF1Diameter - ??????? ???????? 1
+! PF2Diameter - ??????? ???????? 2
+GLOBAL REAL S1Diameter, S2Diameter, S3Diameter, PF1Diameter, PF2Diameter
+
+GLOBAL REAL PFDose
+
+GLOBAL REAL OperatorZOffset(7)
+
+GLOBAL REAL OffsetX(7) 
+GLOBAL REAL OffsetY(7)
+GLOBAL REAL ZOffset(7)
+GLOBAL REAL STARTVELLIN
+GLOBAL REAL STARTVELOUT1
+GLOBAL REAL STARTVELOUT2
+
+GLOBAL INT OutVar
+GLOBAL INT InVar
+
+GLOBAL REAL XGLOBAL
+GLOBAL REAL YGLOBAL
+GLOBAL REAL ZGLOBAL
+GLOBAL REAL XPF1
+GLOBAL REAL XPF2
+
+GLOBAL REAL REDUCER
+
+GLOBAL INT PrevTool
+GLOBAL INT StartTool
+
+! ????? ??
+LOCAL REAL PI
+
+LOCAL INT WORKMODE
+
+LOCAL REAL ActX
+LOCAL REAL ActY
+LOCAL REAL ActZ
+LOCAL REAL Xact
+LOCAL REAL Yact
+LOCAL REAL Iact
+LOCAL REAL Jact
+LOCAL REAL Zactd
+LOCAL REAL Zactu
+LOCAL REAL CurOffsetX
+LOCAL REAL CurOffsetY
+LOCAL REAL CurOffsetZ
+LOCAL REAL OffsetZ
+LOCAL REAL XSavedOffset
+LOCAL REAL YSavedOffset
+LOCAL REAL ZSavedOffset
+
+LOCAL INT FirstScan
+
+! ??????? G00
+G00:
+	LOCAL INT i
+	!DISP "G00"
+		WORKMODE = GGETMODAL(11, 1, 0)
+		IF (WORKMODE = 90)
+			!DISP "90"
+			i = 2
+			LOOP (9)
+				IF 		(gParamAddr(i) = 88)
+					!DISP "X"
+					PTP/wr (0), -FPOS(0) + XGLOBAL + gParamValue(i)
+				ELSEIF  (gParamAddr(i) = 89)
+					!DISP "Y"
+					PTP/wr (1), -FPOS(1) + YGLOBAL + gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 90)
+					!DISP "Z"
+					PTP/wr (2), -FPOS(2) + ZGLOBAL + gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 85)
+					!DISP "U"
+					PTP/wr (3), -FPOS(3) + ZGLOBAL + gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 86)
+					!DISP "V"
+					PTP/wr (4), -FPOS(4) + ZGLOBAL + gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 87)
+					!DISP "W"
+					PTP/wr (5), -FPOS(5) + ZGLOBAL + gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 65)
+					!DISP "A"
+					PTP/wr (6), -FPOS(6) + ZGLOBAL + gParamValue(i)
+				END
+				i = i + 1
+			END
+		ELSE
+			!DISP "91"
+			i = 2
+			LOOP (9)
+				IF 		(gParamAddr(i) = 88)
+					!DISP "X"
+					PTP/wr (0), gParamValue(i)
+				ELSEIF  (gParamAddr(i) = 89)
+					!DISP "Y"
+					PTP/wr (1), gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 90)
+					!DISP "Z"
+					PTP/wr (2), gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 85)
+					!DISP "U"
+					PTP/wr (3), gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 86)
+					!DISP "V"
+					PTP/wr (4), gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 87)
+					!DISP "W"
+					PTP/wr (5), gParamValue(i)
+				ELSEIF 	(gParamAddr(i) = 65)
+					!DISP "A"
+					PTP/wr (6), gParamValue(i)
+				END
+				i = i + 1
+			END
+		END
+	GO ALL
+	TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(2).#MOVE & ^AST(3).#MOVE & ^AST(4).#MOVE & ^AST(5).#MOVE & ^AST(6).#MOVE
+RET
+
+! ??????? G05 - ????????? ???????
+G05:
+PI = 3.14159
+	Xact = 0
+	Yact = 0
+	Zactd = 0
+	WORKMODE = GGETMODAL(11, 2, 0)
+	!DISP "WM = ", WORKMODE
+	IF ((gParamAddr(2)=88) | (gParamAddr(3)=89) | (gParamAddr(4)=90) | (gParamAddr(5)=86) | (gParamAddr(6)=85) | (gParamAddr(7)=83) | (gParamAddr(8)=68))
+			
+		! ???????? ?? ????? ?????? ? ?????????? ????????
+		IF (gParamValue(8) = 1)															! ????? 1
+			
+				IF (PrevTool <> gParamValue(8) + 1)
+					
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(2)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(2)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(2)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 2
+				
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(2)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(2), -CurOffsetZ + OperatorZOffset(2)
+				!PTP/re(2), CurOffsetZ
+				ActX = FPOS(0) 
+				ActY = FPOS(1)
+				ActZ = FPOS(2)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(8) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(8) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+					PTP/re (0, 1), Xact, Yact
+					PTP/re (2), Zactd	
+				ELSE
+					PTP/re (2), Zactd
+					PTP/re (0, 1), Xact, Yact
+				END
+				
+			!TILL ^MST(2).#MOVE
+			PTP/re (7),	gParamValue(5)/(POW(S1Diameter,2)* PI /4)						! ???????????? 
+			!TILL ^MST(7).#MOVE
+			PTP/re (7), (-gParamValue(7))/(POW(S1Diameter,2)* PI /4)		! ??????????
+			!TILL ^MST(7).#MOVE
+			!N20 G01 Z[-gParamValue(5)]
+			PTP/re (2), gParamValue(6)												! ??????????? ?? ??? Z S1
+			!STOP
+			!OffsetZ = FPOS(2)
+			TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(2).#MOVE & ^AST(7).#MOVE
+			
+		ELSEIF (gParamValue(8) = 2)														! ????? 2
+				IF (PrevTool <> gParamValue(8) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(3)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(3)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(3)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				!CurOffsetZ = ZGLOBAL - FPOS(3)
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(3)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				
+				PrevTool = 3
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(3), -CurOffsetZ + OperatorZOffset(3)
+				!PTP/re(3), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(3)
+				
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(8) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(8) + 1)
+					!	Xact = 0
+					!	Yact = 0
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+
+				IF (ActZ > ActZ + Zactd)
+					PTP/re (0, 1), Xact, Yact
+					PTP/re (3), Zactd	
+				ELSE
+					PTP/re (3), Zactd
+					PTP/re (0, 1), Xact, Yact
+				END
+
+			!TILL ^MST(3).#MOVE
+			PTP/re (8),	gParamValue(5)/(POW(S2Diameter,2)* PI /4)						! ???????????? 
+			!TILL ^MST(8).#MOVE
+			PTP/re (8),	(- gParamValue(7))/(POW(S2Diameter,2)* PI /4)	! ??????????
+			!TILL ^MST(8).#MOVE
+			PTP/re (3), gParamValue(6)												! ??????????? ?? ??? Z S2
+			!STOP
+			!OffsetZ = FPOS(3)
+			TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(3).#MOVE & ^AST(8).#MOVE
+			
+		ELSEIF (gParamValue(8) = 3)														! ????? 3
+			!DISP "Num 3"
+				IF (PrevTool <> gParamValue(8) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(4)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(4)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(4)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 4
+				!DISP "CurOffsetX = ", CurOffsetX
+				!DISP "CurOffsetY = ", CurOffsetY
+				!CurOffsetZ = ZGLOBAL - FPOS(4)
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(4)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(4), -CurOffsetZ + OperatorZOffset(4)
+				!PTP/re(4),  CurOffsetZ				
+				!TILL ^MST(0).#MOVE & ^MST(1).#MOVE & ^MST(4).#MOVE
+				!PTP/rev(0, 1), CurOffsetX, CurOffsetY, gParamValue(5)
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(4)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(8) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(8) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+					PTP/re (0, 1), Xact, Yact
+					PTP/re (4), Zactd	
+				ELSE
+					PTP/re (4), Zactd
+					PTP/re (0, 1), Xact, Yact
+				END
+				
+			!TILL ^MST(4).#MOVE
+			PTP/re (9),	gParamValue(5)/(POW(S3Diameter,2)* PI /4)					! ???????????? 
+			!TILL ^MST(9).#MOVE
+			PTP/re (9),	(- gParamValue(7))/(POW(S3Diameter,2)* PI /4)				! ??????????
+			!TILL ^MST(9).#MOVE
+			PTP/re (4), gParamValue(6)												! ??????????? ?? ??? Z S3
+			!STOP
+			!OffsetZ = FPOS(4)
+			!TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(4).#MOVE & ^AST(9).#MOVE
+			
+		ELSE
+			DISP "Wrong Axis"
+			STOP
+		END
+	ELSE
+		DISP "Not enough parameters"
+		STOP
+	END
+RET
+
+! ??????? G11 - ?????????? ???????????
+G11:
+	IF ((gParamAddr(2) = 88) | (gParamAddr(3) = 89) | (gParamAddr(4) = 90) | (gParamAddr(5) = 68))
+		Xact = 0
+		Yact = 0
+		WORKMODE = GGETMODAL(11, 2, 0)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!		
+			IF (gParamValue(5) = 1)						! ????? 1
+
+						IF (PrevTool <> gParamValue(5) + 1)
+							CurOffsetX = -OffsetX(PrevTool) + OffsetX(2)
+							CurOffsetY = -OffsetY(PrevTool) + OffsetY(2)
+							CurOffsetZ = -ZOffset(PrevTool) + ZOffset(2)
+							XSavedOffset = CurOffsetX
+							YSavedOffset = CurOffsetY	
+							ZSavedOffset = CurOffsetZ
+						ELSE
+							CurOffsetX = 0
+							CurOffsetY = 0
+							CurOffsetZ = 0
+						END
+						
+						PrevTool = 2
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(2), -CurOffsetZ + OperatorZOffset(2)
+				!PTP/re(2), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(2)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(5) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+							PTP/re (0, 1), Xact, Yact
+							PTP/re (2),  Zactd
+				ELSE
+							PTP/re (2),  Zactd
+							PTP/re (0, 1), Xact, Yact
+				END
+				
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(2).#MOVE
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!			
+			ELSEIF (gParamValue(5) = 2)						! ????? 2
+
+						IF (PrevTool <> gParamValue(5) + 1)
+							CurOffsetX = -OffsetX(PrevTool) + OffsetX(3)
+							CurOffsetY = -OffsetY(PrevTool) + OffsetY(3)
+							CurOffsetZ = -ZOffset(PrevTool) + ZOffset(3)
+							XSavedOffset = CurOffsetX
+							YSavedOffset = CurOffsetY	
+							ZSavedOffset = CurOffsetZ
+						ELSE
+							CurOffsetX = 0
+							CurOffsetY = 0
+							CurOffsetZ = 0
+						END
+						
+						PrevTool = 3
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(3), -CurOffsetZ + OperatorZOffset(3)
+				!PTP/re(3), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(3)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(5) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+							PTP/re (0, 1), Xact, Yact
+							PTP/re (3),  Zactd
+				ELSE
+							PTP/re (3),  Zactd
+							PTP/re (0, 1), Xact, Yact
+				END
+				
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(3).#MOVE
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+			ELSEIF (gParamValue(5) = 3)						! ????? 3
+
+						IF (PrevTool <> gParamValue(5) + 1)
+							CurOffsetX = -OffsetX(PrevTool) + OffsetX(4)
+							CurOffsetY = -OffsetY(PrevTool) + OffsetY(4)
+							CurOffsetZ = -ZOffset(PrevTool) + ZOffset(4)
+							XSavedOffset = CurOffsetX
+							YSavedOffset = CurOffsetY	
+							ZSavedOffset = CurOffsetZ
+						ELSE
+							CurOffsetX = 0
+							CurOffsetY = 0
+							CurOffsetZ = 0
+						END
+						
+						PrevTool = 4
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(4), -CurOffsetZ + OperatorZOffset(4)
+				!PTP/re(4), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(4)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(5) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+							PTP/re (0, 1), Xact, Yact
+							PTP/re (4),  Zactd
+				ELSE
+							PTP/re (4),  Zactd
+							PTP/re (0, 1), Xact, Yact
+				END
+				
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(4).#MOVE
+				
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+				ELSEIF (gParamValue(5) = 4)						! ????? 4
+
+						IF (PrevTool <> gParamValue(5) + 1)
+							CurOffsetX = -OffsetX(PrevTool) + OffsetX(5)
+							CurOffsetY = -OffsetY(PrevTool) + OffsetY(5)
+							CurOffsetZ = -ZOffset(PrevTool) + ZOffset(5)
+							XSavedOffset = CurOffsetX
+							YSavedOffset = CurOffsetY
+							ZSavedOffset = CurOffsetZ
+						ELSE
+							CurOffsetX = 0
+							CurOffsetY = 0
+							CurOffsetZ = 0
+						END
+						
+						PrevTool = 5
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(5), -CurOffsetZ + OperatorZOffset(5)
+				!PTP/re(5), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(5)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(5) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+							PTP/re (0, 1), Xact, Yact
+							PTP/re (5),  Zactd
+				ELSE
+							PTP/re (5),  Zactd
+							PTP/re (0, 1), Xact, Yact
+				END
+				
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(5).#MOVE
+				
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			ELSEIF (gParamValue(5) = 5)						! ????? 5
+
+						IF (PrevTool <> gParamValue(5) + 1)
+							CurOffsetX = -OffsetX(PrevTool) + OffsetX(6)
+							CurOffsetY = -OffsetY(PrevTool) + OffsetY(6)
+							CurOffsetZ = -ZOffset(PrevTool) + ZOffset(6)
+							XSavedOffset = CurOffsetX
+							YSavedOffset = CurOffsetY	
+							ZSavedOffset = CurOffsetZ
+						ELSE
+							CurOffsetX = 0
+							CurOffsetY = 0
+							CurOffsetZ = 0
+						END
+						
+						PrevTool = 6
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(6), -CurOffsetZ + OperatorZOffset(6)
+				!PTP/re(6), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(6)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(5) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ActZ > ActZ + Zactd)
+							PTP/re (0, 1), Xact, Yact
+							PTP/re (6),  Zactd
+				ELSE
+							PTP/re (6),  Zactd
+							PTP/re (0, 1), Xact, Yact
+				END
+				
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(6).#MOVE
+				
+			ELSE
+				DISP "Wronge Dose number"
+				STOP
+			END		
+	ELSE
+		DISP "Not enough parameters"
+		STOP
+	END
+RET
+
+! ??????? G87 - ????????????
+G87:
+PI = 3.14159
+	IF ((gParamAddr(2)=80) | (gParamAddr(3)=80) | (gParamAddr(4)=80))
+		IF 		(gParamValue(3)=1)															! ????? 1
+			PTP/re (7), gParamValue(2)/(POW(S1Diameter,2)* PI /4)							! ????????????
+			!STOP
+		ELSEIF 	(gParamValue(3)=2)															! ????? 2
+			PTP/re (8), gParamValue(2)/(POW(S2Diameter,2)* PI /4)							! ????????????
+			!STOP	
+		ELSEIF 	(gParamValue(3)=3)															! ????? 3
+			PTP/re (9), gParamValue(2)/(POW(S3Diameter,2)* PI /4)							! ????????????
+			!STOP
+		ELSEIF 	(gParamValue(3)=5)															! ???????
+			XPF1 = gParamValue(2)*gParamValue(4)/100/(POW(PF1Diameter,2)* PI /4) * REDUCER
+			XPF2 = gParamValue(2)*(1-gParamValue(4)/100)/(POW(PF2Diameter,2)* PI /4) * REDUCER
+			!PTP/re (14), gParamValue(2)*gParamValue(4)/100/(POW(PF1Diameter,2)* PI /4)		! ????????????
+			!PTP/re (15), gParamValue(2)*(1-gParamValue(4)/100)/(POW(PF2Diameter,2)* PI /4)	! ????????????
+			!STOP
+		ELSE
+			DISP "Wrong Axis"
+			!STOP
+		END
+	ELSE
+		DISP "Wrong Parameters"
+		STOP
+	END
+RET
+
+! ??????? G88 - ????? ?????????
+G88:
+OperatorZOffset(0) = 0  ! X
+OperatorZOffset(1) = 0	! Y
+OperatorZOffset(2) = 0	! Z1
+OperatorZOffset(3) = 0	! Z2
+OperatorZOffset(4) = 0	! Z3
+OperatorZOffset(5) = 0	! Z4
+OperatorZOffset(6) = 0	! Z5
+
+! OperatorZOffset(7) = (x,y,z1,z2,z3,z4,z5)
+PI = 3.14159
+	LOCAL REAL ExtractTime 		! ????? ?? ??, ????? ???????? ??????
+	LOCAL REAL ExtractVelocity	! ???????? ????????????
+	LOCAL REAL ExtractVelocityPF
+	LOCAL REAL R
+	LOCAL REAL L
+	LOCAL REAL Portion
+	LOCAL REAL n
+	LOCAL REAL a, b
+	LOCAL REAL VectAX, VectAY, VectBX, VectBY
+
+	IF ((gParamAddr(2)=88) | (gParamAddr(3)=89) | (gParamAddr(4)=90) | (gParamAddr(5)=70) | (gParamAddr(6)=86) | (gParamAddr(7)=68) | (gParamAddr(8)=81) | (gParamAddr(9)=84) | (gParamAddr(10)=73) | (gParamAddr(11)=74))
+		! ????? ?????? G-????
+		REDUCER = 1
+		Xact = 0
+		Yact = 0
+		WORKMODE = GGETMODAL(11, 2, 0)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		IF (gParamValue(9) = 1)							! ???????? ??????????? G1
+		!DISP "Type 1"
+		! ??????????? ?? ??? X ? Y ? ???????? ?????????
+		! ???????? ?? ????? ????????
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			IF (gParamValue(7) = 1)						! ????? 1
+			!DISP "Syringe 1"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(2)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(2)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(2)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY	
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 2
+				
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(2)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(2), -CurOffsetZ + OperatorZOffset(2)
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(2)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! - ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ABS(Xact) < POW(10, -10))
+					Xact = 0
+				END
+				
+				IF (ABS(Yact) < POW(10, -10))
+					Yact = 0
+				END
+
+				L = SQRT(POW(Xact , 2) + POW(Yact , 2))
+				
+				IF (L <> 0)
+					ExtractTime = L / gParamValue(5)
+					ExtractVelocity = gParamValue(6) / (POW(S1Diameter,2)* PI /4) / (ExtractTime) 
+					Portion =  gParamValue(6) / (POW(S1Diameter,2)* PI /4)
+				ELSE
+					ExtractVelocity = 0
+					Portion = 0
+				END
+				
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+
+				! ???????? ? ??/c 
+				IF (ExtractVelocity * REDUCER <= XVEL(7))
+					!IF (ExtractVelocity > 0)
+						IF (ActZ > ActZ + Zactd)
+							PTP/rv (7),  Portion, ExtractVelocity * REDUCER
+							PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+							PTP/rev (2),  Zactd, gParamValue(5) * REDUCER
+						ELSE
+							PTP/rev (2),  Zactd, gParamValue(5) * REDUCER
+							PTP/rv (7), Portion, ExtractVelocity * REDUCER
+							PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+						END
+					!ELSE
+					!	DISP "S1 extract velocity is equal to 0"
+					!END
+				ELSE
+					DISP "S1 velocity too hight"
+				END
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(7).#MOVE
+
+			ELSEIF (gParamValue(7) = 2)					! ????? 2
+			!DISP "Syringe 2"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(3)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(3)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(3)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				!DISP "CurOffsetX =", CurOffsetX
+				!DISP "CurOffsetY =", CurOffsetY
+				
+				PrevTool = 3
+				
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(3)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(3), -CurOffsetZ + OperatorZOffset(3)
+				
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(3)
+				
+				!DISP "ActX =", ActX
+				!DISP "ActY =", ActY
+				!DISP "ActZ =", ActZ
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						!DISP "START"
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						!DISP "ELSE"
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! - ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				!DISP "Xact = ", Xact
+				!DISP "Yact = ", Yact
+				!DISP "XSavedOffset = ", XSavedOffset
+				!DISP "YSavedOffset = ", YSavedOffset				
+				!
+				
+				IF (ABS(Xact) < POW(10, -10))
+					Xact = 0
+				END
+				
+				IF (ABS(Yact) < POW(10, -10))
+					Yact = 0
+				END
+				
+				L = SQRT(POW(Xact , 2) + POW(Yact , 2))
+				
+				IF (L <> 0)
+					ExtractTime = L / gParamValue(5)
+					ExtractVelocity = gParamValue(6) / (POW(S2Diameter,2)* PI /4) / (ExtractTime)
+					Portion =  gParamValue(6) / (POW(S2Diameter,2)* PI /4)
+				ELSE
+					ExtractVelocity = 0
+					Portion = 0
+				END
+				
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+				
+				IF (ExtractVelocity * REDUCER <= XVEL(8))
+					!IF (ExtractVelocity > 0)
+						IF (ActZ > ActZ + Zactd)
+							PTP/rv (8),  Portion, ExtractVelocity * REDUCER
+							PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+							PTP/rev (3),  Zactd, gParamValue(5) * REDUCER
+						ELSE
+							PTP/rev (3),  Zactd, gParamValue(5) * REDUCER
+							PTP/rv (8),  Portion, ExtractVelocity * REDUCER
+							PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+						END
+					!ELSE
+					!	DISP "S2 extract velocity is equal to 0"
+					!END
+				ELSE
+					DISP "S2 velocity too hight"
+				END
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(8).#MOVE
+				!DISP "Motion Syringe OK
+				
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!				
+			ELSEIF (gParamValue(7) = 3)					! ????? 3
+				DISP "Syringe 3"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(4)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(4)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(4)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 4
+				
+				!DISP "CurOffsetX =", CurOffsetX
+				!DISP "CurOffsetY =", CurOffsetY
+				
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(4)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(4), -CurOffsetZ + OperatorZOffset(4)
+			
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(4)
+				
+				!DISP "ActX =", ActX
+				!DISP "ActY =", ActY
+				!DISP "ActZ =", ActZ
+				
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						!DISP "START"
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)				
+					ELSE 
+						!DISP "ELSE"
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! - ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ABS(Xact) < POW(10, -10))
+					Xact = 0
+				END
+				
+				IF (ABS(Yact) < POW(10, -10))
+					Yact = 0
+				END
+				
+				!DISP "Xact = ", Xact
+				!DISP "Yact = ", Yact	
+				!DISP "XSavedOffset = ", XSavedOffset
+				!DISP "YSavedOffset = ", YSavedOffset
+				
+				L = SQRT(POW(Xact , 2) + POW(Yact , 2))
+				
+				IF (L <> 0)
+					ExtractTime = L / gParamValue(5)
+					ExtractVelocity = gParamValue(6) / (POW(S3Diameter,2)* PI /4) / (ExtractTime)
+					Portion = gParamValue(6) / (POW(S3Diameter,2)* PI /4)
+				ELSE
+					ExtractVelocity = 0
+					Portion = 0
+				END
+				
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+				
+				IF (ExtractVelocity * REDUCER <= XVEL(9))
+					!IF (ExtractVelocity > 0)
+						IF (ActZ > ActZ + Zactd)
+							PTP/rv (9),  Portion, ExtractVelocity * REDUCER
+							PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+							PTP/rev (4),  Zactd, gParamValue(5) * REDUCER
+						ELSE
+							PTP/rev (4),  Zactd, gParamValue(5) * REDUCER
+							PTP/rv (9),  Portion, ExtractVelocity * REDUCER
+							PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+						END
+						!PTP/rv (0, 1), gParamValue(2), gParamValue(3), gParamValue(5)
+						!N69 G91
+						!N70 G01 X[gParamValue(2)] Y[gParamValue(3)] F[gParamValue(5)]
+					!ELSE
+					!	DISP "S3 extract velocity is equal to 0"
+					!END
+					!N71 G04 P0.1
+				ELSE
+					DISP "S3 velocity too hight"
+				END
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(9).#MOVE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!				
+			ELSEIF (gParamValue(7) = 5)					! ???????
+			DISP "Preflow"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(6)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(6)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(6)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 6
+				
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(6)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				!DISP "Axis 6"
+				PTP/re (0, 1), CurOffsetX, CurOffsetY
+				PTP/re(6), -CurOffsetZ + OperatorZOffset(6)
+				!DISP "PTP XY"
+				!PTP/re (6), 0
+				!DISP "PTP Z"
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(6)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! - ZSavedOffset
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+				END
+				
+				IF (ABS(Xact) < POW(10, -10))
+					Xact = 0
+				END
+				
+				IF (ABS(Yact) < POW(10, -10))
+					Yact = 0
+				END				
+				
+				L = SQRT(POW(Xact , 2) + POW(Yact , 2))
+				
+				IF (L <> 0)
+					ExtractTime = L / gParamValue(5)
+					ExtractVelocity = gParamValue(6) / (POW(PF1Diameter,2)* PI /4) * gParamValue(8)/100 / (ExtractTime)
+					ExtractVelocityPF = gParamValue(6) / (POW(PF2Diameter,2)* PI /4)* (1 - gParamValue(8)/100)/ (ExtractTime)
+				ELSE
+					ExtractVelocity = 0
+					ExtractVelocityPF = 0
+				END		
+				
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+
+				IF (ActZ > ActZ + Zactd)
+					XPF1 = ExtractVelocity * REDUCER
+					XPF2 = ExtractVelocityPF * REDUCER
+					PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+					PTP/rev (6),  Zactd, gParamValue(5) * REDUCER
+				ELSE
+					PTP/rev (6),  Zactd, gParamValue(5) * REDUCER
+					XPF1 = ExtractVelocity * REDUCER
+					XPF2 = ExtractVelocityPF * REDUCER
+					PTP/rev (0, 1), Xact, Yact, gParamValue(5) * REDUCER
+				END
+				!PTP/rv (14),  gParamValue(6) / (POW(PF1Diameter,2)* PI /4) * gParamValue(8)/100, ExtractVelocity
+				!PTP/rv (15),  gParamValue(6) / (POW(PF2Diameter,2)* PI /4)* (1 - gParamValue(8)/100), ExtractVelocityPF
+
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE
+				XPF1 = 0
+				XPF2 = 0
+			ELSE
+				DISP "Wrong Axis"
+				STOP	
+			END
+		
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
+		ELSEIF (gParamValue(9) = 2)	! ???????? ??????????? G2 ?? ??????? ???????
+		!DISP "Type 2"	
+		! ???????? ?? ????? ????????
+			IF (gParamValue(7) = 1)						! ????? 1
+			!DISP "Syringe 1"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(2)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(2)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(2)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 2
+				
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(2)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(2), -CurOffsetZ + OperatorZOffset(2)
+				!PTP/re(2), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(2)
+				
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)						
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+				END
+				
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+				
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END
+		
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!DISP "n = ", n
+		L = R * (2 * PI - n) 
+		
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			Portion = gParamValue(6) / (POW(S1Diameter,2)* PI /4)
+			ExtractVelocity = Portion / (ExtractTime)
+		ELSE
+			Portion = 0
+			ExtractVelocity = 0
+		END
+		
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+		
+		IF (ExtractVelocity * REDUCER <= XVEL(7))
+			!IF (ExtractVelocity > 0)
+					IF (ActZ > ActZ + Zactd)
+						PTP/rvw (7),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						GO (0, 1, 7)
+						PTP/rev (2),  Zactd, gParamValue(5) * REDUCER
+					ELSE
+						PTP/revw (2),  Zactd, gParamValue(5) * REDUCER
+						PTP/rvw (7),  Portion, ExtractVelocity * REDUCER
+						XSEG/v (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						GO (0, 1, 7)
+					END
+				!OffsetZ = FPOS(2)
+			!ELSE
+			!	DISP "S1 extract velocity is equal to 0"
+			!END
+		ELSE
+			DISP "S1 velocity too hight"
+		END
+		TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(7).#MOVE
+			
+		ELSEIF (gParamValue(7) = 2)					! ????? 2
+					!DISP "Syringe 1"
+			IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(3)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(3)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(3)
+					XSavedOffset = CurOffsetX 
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+			ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+			END
+			
+			PrevTool = 3
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(3)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(3), -CurOffsetZ + OperatorZOffset(3)
+				!PTP/re(3), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(3)
+			IF (WORKMODE = 90)
+				IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+				!ELSEIF (PrevTool = gParamValue(7) + 1)
+				!		Xact = 0
+				!		Yact = 0	
+				!		Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+				ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+				END
+			ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+			END
+			
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+				
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END				
+	
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!DISP "n = ", n
+		L = R * (2 * PI - n) 
+		!DISP L
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(S2Diameter,2)* PI /4)/(ExtractTime)
+			Portion = gParamValue(6) / (POW(S2Diameter,2)* PI /4)
+		ELSE
+			Portion = 0
+			ExtractVelocity = 0
+		END
+			!DISP ExtractVelocity
+			!DISP Portion
+			
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+
+		IF (ExtractVelocity * REDUCER <= XVEL(8))
+			!IF (ExtractVelocity > 0)
+					IF (ActZ > ActZ + Zactd)
+						PTP/rvw (8),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						GO (0, 1, 8)
+						PTP/rev (3),  Zactd, gParamValue(5) * REDUCER
+					ELSE
+						PTP/rev (3),  Zactd, gParamValue(5) * REDUCER
+						PTP/rvw (8),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						GO (0, 1, 8)
+					END
+			!ELSE
+			!	DISP "S2 extract velocity is equal to 0"
+				!OffsetZ = FPOS(3)
+			!END
+		ELSE
+			DISP "S2 velocity too hight"
+		END
+		TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(8).#MOVE
+
+		ELSEIF (gParamValue(7) = 3)					! ????? 3
+			
+					!	DISP "Syringe 1"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(4)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(4)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(4)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 4
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(4)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(4), -CurOffsetZ + OperatorZOffset(4)
+				!PTP/re(4), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(4)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+				END
+
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+			
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END
+				
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!DISP "n = ", n * 180 / PI
+		L = R * (2 * PI - n)
+		!DISP "L = ", L
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(S3Diameter,2)* PI /4)/(ExtractTime)
+			Portion = gParamValue(6) / (POW(S3Diameter,2)* PI /4)
+		ELSE
+			Portion = 0
+			ExtractVelocity = 0
+		END
+		
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+		
+		!DISP "L = ", L
+		!DISP "Portion = ", Portion
+		!DISP "ExtractVelocity = ", ExtractVelocity
+		IF (ExtractVelocity * REDUCER <= XVEL(9))
+			!IF (ExtractVelocity > 0)
+					IF (ActZ > ActZ + Zactd)
+						PTP/rvw (9),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						GO (0, 1, 9)
+						PTP/rev (4),  Zactd, gParamValue(5) * REDUCER
+					ELSE
+						PTP/rev (4),  Zactd, gParamValue(5) * REDUCER
+						PTP/rvw (9),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						GO (0, 1, 9)
+					END
+			!ELSE
+				!	DISP "S3 extract velocity is equal to 0"
+				!OffsetZ = FPOS(4)
+			!END
+		ELSE
+			DISP "S3 velocity too hight"
+		END
+		TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(9).#MOVE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ELSEIF (gParamValue(7) = 5)					! ???????
+					!DISP "Syringe 1"
+			IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(6)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(6)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(6)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+			ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+			END
+			
+			PrevTool = 6
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(6)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(6), -CurOffsetZ + OperatorZOffset(6)
+				!PTP/re(6), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(6)
+			IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+			ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+			END
+				
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		
+		
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+		
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END		
+		
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!DISP "n = ", n
+		L = R * (2 * PI - n) 
+		
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(PF1Diameter,2)* PI /4) * gParamValue(8)/100 /(ExtractTime)
+			ExtractVelocityPF = gParamValue(6) / (POW(PF2Diameter,2)* PI /4)* (1 - gParamValue(8)/100)/ExtractTime
+		ELSE
+			ExtractVelocity = 0
+			ExtractVelocityPF = 0
+		END
+		
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+
+				IF (ActZ > ActZ + Zactd)
+						XPF1 = ExtractVelocity * REDUCER
+						XPF2 = ExtractVelocityPF * REDUCER
+						XSEG/v (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+						PTP/rev (6),  Zactd, gParamValue(5) * REDUCER
+				ELSE
+						PTP/rev (6),  Zactd, gParamValue(5) * REDUCER
+						XPF1 = ExtractVelocity * REDUCER
+						XPF2 = ExtractVelocityPF * REDUCER
+						XSEG/v (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, -
+						ENDS (0, 1)
+				END
+
+				!PTP/rv (14),  gParamValue(6) / (POW(PF1Diameter,2)* PI /4) * gParamValue(8)/100, ExtractVelocity
+				!PTP/rv (15),  gParamValue(6) / (POW(PF2Diameter,2)* PI /4)* (1 - gParamValue(8)/100), ExtractVelocityPF
+
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE
+				XPF1 = 0
+				XPF2 = 0
+			ELSE
+				DISP "Wrong Axis"
+				STOP
+			END
+		
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ELSEIF (gParamValue(9) = 3) ! ???????? ??????????? G3 ?????? ??????? ???????
+		!DISP "Type 3"
+		! ???????? ?? ????? ????????
+			IF (gParamValue(7) = 1)						! ????? 1
+						!DISP "Syringe 1"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(2)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(2)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(2)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 2
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(2)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(2), -CurOffsetZ + OperatorZOffset(2)
+				!PTP/re(2), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(2)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+				END
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+			
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END
+				
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!DISP "n = ", n
+		L = R * n 
+		
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(S1Diameter,2)* PI /4)/(ExtractTime)
+			Portion = gParamValue(6) / (POW(S1Diameter,2)* PI /4)
+		ELSE
+			Portion = 0
+			ExtractVelocity = 0
+		END		
+		
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+		
+		IF (ExtractVelocity * REDUCER <= XVEL(7))
+			!IF (ExtractVelocity > 0)
+					IF (ActZ > ActZ + Zactd)
+						PTP/rvw (7),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						GO (0, 1, 7)
+						PTP/rev (2),  Zactd, gParamValue(5) * REDUCER
+					ELSE
+						PTP/rev (2),  Zactd, gParamValue(5) * REDUCER
+						PTP/rvw (7), Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						GO (0, 1, 7)
+					END
+			!ELSE
+			!	DISP "S1 extract velocity is equal to 0"
+				!OffsetZ = FPOS(2)
+			!END
+		ELSE
+			DISP "S1 velocity too hight"
+		END
+		TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(7).#MOVE
+			
+		ELSEIF (gParamValue(7) = 2)					! ????? 2
+						!DISP "Syringe 1"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(3)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(3)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(3)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 3
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(3)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(3), -CurOffsetZ + OperatorZOffset(3)
+				!PTP/re(3), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(3)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)						
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset		
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+				END
+
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+			
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END		
+		
+		!R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!DISP "n = ", n
+		L = R * n
+
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(S2Diameter,2)* PI /4)/(ExtractTime)
+			Portion = gParamValue(6) / (POW(S2Diameter,2)* PI /4)
+		ELSE
+			Portion = 0
+			ExtractVelocity = 0
+		END	
+		
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+		
+		IF (ExtractVelocity * REDUCER <= XVEL(8))
+			!IF (ExtractVelocity > 0)
+					IF (ActZ > ActZ + Zactd)
+						PTP/rvw (8),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						GO (0, 1, 8)
+						PTP/rev (3),  Zactd, gParamValue(5) * REDUCER
+					ELSE
+						PTP/rev (3),  Zactd, gParamValue(5) * REDUCER
+						PTP/rvw (8),  Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						GO (0, 1, 8)
+					END
+			!ELSE
+			!		DISP "S2 extract velocity is equal to 0"
+			!END
+				!OffsetZ = FPOS(3)
+		ELSE
+			DISP "S2 velocity too hight"
+		END
+		TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(8).#MOVE
+				
+		ELSEIF (gParamValue(7) = 3)					! ????? 3
+			!DISP "Syringe 3"
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(4)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(4)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(4)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 4
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(4)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(4), -CurOffsetZ + OperatorZOffset(4)
+				!PTP/re(4), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(4)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)
+				END
+
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+				
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END
+		
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		!a = (VectAX * VectBX) 
+		!b = (VectAY * VectBY)
+		!DISP "a = ", a
+		!DISP "b = ", b
+		!IF ((VectBX = 0) & (VectBY = 0) & (VectAX = 0) & (VectAY = 0))
+		!	n = 0
+		!ELSEIF ((VectBX <> 0) & (VectBY <> 0) & (VectAX = 0) & (VectAY = 0))
+		!	n = ACOS((a + b) / (SQRT(POW(VectBX ,2) + POW(VectBY ,2))))
+		!ELSEIF ((VectBX = 0) & (VectBY = 0) & (VectAX <> 0) & (VectAY <> 0))
+		!	n = ACOS((a + b) / (SQRT(POW(VectAX ,2) + POW(VectAY ,2))))
+		!ELSE
+		!	n = ACOS((a + b) / (SQRT(POW(VectAX, 2) + POW(VectAY, 2)) * SQRT(POW(VectBX, 2) + POW(VectBY, 2))))
+		!END
+		!DISP "n = ", n / PI * 180
+		L = R * n
+		
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(S3Diameter,2)* PI /4)/(ExtractTime)
+			Portion = gParamValue(6) / (POW(S3Diameter,2)* PI /4)
+		ELSE
+			Portion = 0
+			ExtractVelocity = 0
+		END	
+		
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+				
+		IF (ExtractVelocity * REDUCER <= XVEL(9))
+			!IF (ExtractVelocity > 0)
+					IF (ActZ > ActZ + Zactd)
+						PTP/rvw (9), Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						GO (0, 1, 9)
+						PTP/rev (4),  Zactd, gParamValue(5) * REDUCER
+					ELSE
+						PTP/rev (4),  Zactd, gParamValue(5) * REDUCER
+						PTP/rvw (9), Portion, ExtractVelocity * REDUCER
+						XSEG/vw (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						GO (0, 1, 9)
+					END
+			!ELSE
+			!		DISP "S2 extract velocity is equal to 0"
+			!END
+				!OffsetZ = FPOS(4)
+		ELSE
+			DISP "S3 velocity too hight"
+		END
+
+		TILL ^AST(0).#MOVE & ^AST(1).#MOVE & ^AST(9).#MOVE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!				
+		ELSEIF (gParamValue(7) = 5)					! ???????
+				IF (PrevTool <> gParamValue(7) + 1)
+					CurOffsetX = -OffsetX(PrevTool) + OffsetX(6)
+					CurOffsetY = -OffsetY(PrevTool) + OffsetY(6)
+					CurOffsetZ = -ZOffset(PrevTool) + ZOffset(6)
+					XSavedOffset = CurOffsetX
+					YSavedOffset = CurOffsetY
+					ZSavedOffset = CurOffsetZ
+				ELSE
+					CurOffsetX = 0
+					CurOffsetY = 0
+					CurOffsetZ = 0
+				END
+				
+				PrevTool = 6
+				!IF (OffsetZ <> 0)
+				!	CurOffsetZ = OffsetZ - FPOS(6)
+				!ELSEIF (OffsetZ = ZGLOBAL)
+				!	CurOffsetZ = 0
+				!ELSE
+				!	CurOffsetZ = 0
+				!END
+				PTP/re(0, 1), CurOffsetX, CurOffsetY
+				PTP/re(6), -CurOffsetZ + OperatorZOffset(6)
+				!PTP/re(6), CurOffsetZ
+				ActX = FPOS(0)
+				ActY = FPOS(1)
+				ActZ = FPOS(6)
+				IF (WORKMODE = 90)
+					IF (StartTool = gParamValue(7) + 1)
+						Xact = -ActX + XGLOBAL + gParamValue(2)
+						Yact = -ActY + YGLOBAL + gParamValue(3)	
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+						!Iact = -ActX + XGLOBAL + gParamValue(10)
+						!Jact = -ActY + YGLOBAL + gParamValue(11)
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					!ELSEIF (PrevTool = gParamValue(7) + 1)
+					!	Xact = 0
+					!	Yact = 0	
+					!	Zactd = -ActZ + ZGLOBAL + gParamValue(4)
+					ELSE 
+						Xact = -ActX + XGLOBAL + gParamValue(2) + XSavedOffset
+						Yact = -ActY + YGLOBAL + gParamValue(3) + YSavedOffset
+						Zactd = -ActZ + ZGLOBAL + gParamValue(4)! + ZSavedOffset
+						!Iact = -ActX + XGLOBAL + gParamValue(10) + XSavedOffset
+						!Jact = -ActY + YGLOBAL + gParamValue(11) + YSavedOffset	
+						Iact = gParamValue(10)
+						Jact = gParamValue(11)
+					END
+				ELSE
+					Xact = gParamValue(2)
+					Yact = gParamValue(3)
+					Zactd = gParamValue(4)
+					Iact = gParamValue(10)
+					Jact = gParamValue(11)					
+				END
+
+		IF (ABS(Xact) < POW(10, -10))
+			Xact = 0
+		END
+		
+		IF (ABS(Yact) < POW(10, -10))
+			Yact = 0
+		END				
+		
+		R = SQRT(POW(Iact,2) + POW(Jact,2))
+		!DISP "R = ", R
+		VectAX = (ActX - (ActX + Iact))
+		VectAY = (ActY - (ActY + Jact))
+		VectBX = ((ActX + Xact) - (ActX + Iact))
+		VectBY = ((ActY + Yact) - (ActY + Jact))
+		!DISP "VectAX = ", VectAX
+		!DISP "VectAY = ", VectAY
+		!DISP "VectBX = ", VectBX
+		!DISP "VectBY = ", VectBY
+		a = ATAN2(VectAY, VectAX)
+			IF a < 0
+				a = 2 * PI + a
+			END
+		b = ATAN2(VectBY, VectBX)
+			IF b < 0
+				b = 2 * PI + b
+			END
+		n = b - a
+			IF n < 0
+				n = 2 * PI + n
+			END
+		L = R * n 
+		
+		IF (L <> 0)
+			ExtractTime = L / gParamValue(5)
+			ExtractVelocity = gParamValue(6) / (POW(PF1Diameter,2)* PI /4) * gParamValue(8)/100 /(ExtractTime)
+			ExtractVelocityPF = gParamValue(6) / (POW(PF2Diameter,2)* PI /4)* (1 - gParamValue(8)/100)/(ExtractTime)	
+		ELSE
+			ExtractVelocity = 0
+			ExtractVelocityPF = 0
+		END	
+
+				STARTVELLIN = gParamValue(5)
+				STARTVELOUT1 = ExtractVelocity
+				STARTVELOUT2 = ExtractVelocityPF
+				
+				IF (ActZ > ActZ + Zactd)
+						XPF1 = ExtractVelocity * REDUCER
+						XPF2 = ExtractVelocityPF * REDUCER
+						XSEG/v (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+						PTP/rev (6),  Zactd, gParamValue(5) * REDUCER
+				ELSE
+						PTP/rev (6),  Zactd, gParamValue(5) * REDUCER
+						XPF1 = ExtractVelocity * REDUCER
+						XPF2 = ExtractVelocityPF * REDUCER
+						XSEG/v (0, 1), FPOS(0), FPOS(1), gParamValue(5) * REDUCER
+						ARC1 (0, 1), FPOS(0) + Iact, FPOS(1) + Jact, FPOS(0) + Xact, FPOS(1) + Yact, +
+						ENDS (0, 1)
+				END			
+
+				!PTP/rv (14),  gParamValue(6) / (POW(PF1Diameter,2)* PI /4) * gParamValue(8)/100, ExtractVelocity
+				!PTP/rv (15),  gParamValue(6) / (POW(PF2Diameter,2)* PI /4)* (1 - gParamValue(7)/100), ExtractVelocityPF
+				!OffsetZ = FPOS(6)
+				TILL ^AST(0).#MOVE & ^AST(1).#MOVE
+				XPF1 = 0
+				XPF2 = 0
+			ELSE
+				DISP "Wrong Axis"
+				STOP
+			END
+		ELSE
+			DISP "Wrong Motion"
+			STOP
+		END
+	ELSE
+		DISP "Not enough parameters"
+		STOP
+	END
+RET
+
+! ??????? G89 - ??????????
+G89:
+PI = 3.14159
+	IF ((gParamAddr(2)=80) | (gParamAddr(3)=80) | (gParamAddr(4)=80))
+		IF 		(gParamValue(3)=1)														! ????? 1
+			PTP/re (7), -gParamValue(2)/(POW(S1Diameter,2)* PI /4)							! ??????????
+			!STOP
+		ELSEIF 	(gParamValue(3)=2)														! ????? 2
+			PTP/re (8), -gParamValue(2)/(POW(S2Diameter,2)* PI /4)							! ??????????
+			!STOP
+		ELSEIF 	(gParamValue(3)=3)														! ????? 3
+			PTP/re (9), -gParamValue(2)/(POW(S3Diameter,2)* PI /4)							! ??????????
+			!STOP
+		ELSEIF 	(gParamValue(3)=5)														! ???????
+			XPF1 = -gParamValue(2)*gParamValue(4)/100/(POW(PF1Diameter,2)* PI /4)
+			XPF2 = -gParamValue(2)*(1-gParamValue(4)/100)/(POW(PF2Diameter,2)* PI /4)
+			!PTP/re (14), -gParamValue(2)*gParamValue(4)/100/(POW(PF1Diameter,2)* PI /4)		! ??????????
+			!PTP/re (15), -gParamValue(2)*(1-gParamValue(4)/100)/(POW(PF2Diameter,2)* PI /4) ! ??????????
+			!STOP
+		ELSE
+			DISP "Wrong Axis"
+			STOP
+		END
+	ELSE
+		DISP "Wrong Parameters"
+		STOP
+	END
+RET

@@ -138,15 +138,15 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
-        self.lin_F.setText('4')
+        self.lin_F.setText('1')
 
         self.lin_nz = QtWidgets.QLineEdit(self)
         self.lin_nz.setGeometry(QtCore.QRect(30, 250, 120, 20))#nz
-        self.lin_nz.setText('3')
+        self.lin_nz.setText('1')
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
         self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
-        self.lin_ndoz.setText('3')
+        self.lin_ndoz.setText('1')
 
         self.lin_startx = QtWidgets.QLineEdit(self)
         self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startx
@@ -166,7 +166,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_diam_syr = QtWidgets.QLineEdit(self)
         self.lin_diam_syr.setGeometry(QtCore.QRect(30, 370, 120, 20))#diam_syr
-        self.lin_diam_syr.setText('5.75')
+        self.lin_diam_syr.setText('12')
 
         self.lin_name = QtWidgets.QLineEdit(self)
         self.lin_name.setGeometry(QtCore.QRect(30, 430, 300, 20))#name
@@ -258,7 +258,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         else:
             self.koord_1 = generate_mesh([self.koord_1[-1]],trajectory_settings)
             
-        gcode = generate_traj_Fabion(self.koord_1, print_settings)
+        gcode = generate_traj_Fabion2(self.koord_1, print_settings)
         self.prog_code+=gcode
         #self.clear_mesh_2()
         self.addToViewerTraj(parse_g_code(self.prog_code))  
@@ -267,7 +267,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         print("gen_mesh")
         print_settings, trajectory_settings = self.setSettings()
         self.koord_1 = honeycomb_with_hole(trajectory_settings)
-        gcode = generate_traj_Fabion(self.koord_1, print_settings)
+        gcode = generate_traj_Fabion2(self.koord_1, print_settings)
         self.prog_code+=gcode
         #self.clear_mesh_2()
         self.addToViewerTraj(parse_g_code(self.prog_code))  
