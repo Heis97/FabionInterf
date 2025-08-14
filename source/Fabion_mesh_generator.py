@@ -139,19 +139,19 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_diam = QtWidgets.QLineEdit(self)
         self.lin_diam.setGeometry(QtCore.QRect(30+dx1_lin, 190, 120+dx1_lin_dim, 20))#diam
-        self.lin_diam.setText('0.6')
+        self.lin_diam.setText('0.7')
 
         self.lin_F = QtWidgets.QLineEdit(self)
         self.lin_F.setGeometry(QtCore.QRect(30+dx1_lin, 220, 120+dx1_lin_dim, 20))#F
-        self.lin_F.setText('1')
+        self.lin_F.setText('0.5')
 
         self.lin_nz = QtWidgets.QLineEdit(self)
         self.lin_nz.setGeometry(QtCore.QRect(30+dx1_lin, 250, 120+dx1_lin_dim, 20))#nz
-        self.lin_nz.setText('1')
+        self.lin_nz.setText('2')
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
         self.lin_ndoz.setGeometry(QtCore.QRect(30+dx1_lin, 280, 120+dx1_lin_dim, 20))#ndoz
-        self.lin_ndoz.setText('1')
+        self.lin_ndoz.setText('2')
 
         self.lin_startx = QtWidgets.QLineEdit(self)
         self.lin_startx.setGeometry(QtCore.QRect(30+dx1_lin, 310, 40, 20))#startx
@@ -196,7 +196,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_k_e_ext = QtWidgets.QLineEdit(self)
         self.lin_k_e_ext.setGeometry(QtCore.QRect(30+80, 130, 120+dx1_lin_dim, 20))#k_e_ext
-        self.lin_k_e_ext.setText('0.6')
+        self.lin_k_e_ext.setText('0.8')
 
         self.label_nx = QtWidgets.QLabel('k_e_ext',self)
         self.label_nx.setGeometry(QtCore.QRect(160+30, 130, dimx_lab, 20))
@@ -217,7 +217,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
         self.lin_ndoz_vn = QtWidgets.QLineEdit(self)
         self.lin_ndoz_vn.setGeometry(QtCore.QRect(30+80, 220, 120+dx1_lin_dim, 20))#ndoz_vn
-        self.lin_ndoz_vn.setText('2')
+        self.lin_ndoz_vn.setText('1')
 
         self.label_nx = QtWidgets.QLabel('ndoz_vn',self)
         self.label_nx.setGeometry(QtCore.QRect(160+30, 220, dimx_lab, 20))
@@ -329,9 +329,9 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         gcode = generate_traj_Fabion2(self.koord_1, print_settings)
         self.prog_code+=gcode
 
-        self.koord_1 = honeycomb_dep(trajectory_settings)
-        print_settings.ndoz = float(self.lin_ndoz_vn.text())
-        gcode = generate_file_sph_Fanion2(self.koord_1, print_settings)
+        #self.koord_1 = honeycomb_dep(trajectory_settings)
+        #print_settings.ndoz = float(self.lin_ndoz_vn.text())
+        #gcode = generate_file_sph_Fanion2(self.koord_1, print_settings)
         self.prog_code+=gcode
         #self.clear_mesh_2()
         self.addToViewerTraj(parse_g_code(self.prog_code))  

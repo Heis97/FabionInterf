@@ -286,10 +286,10 @@ def one_layer_honeycomb_with_hole(trajectory_settings:TrajectorySettings,z_cur,_
     for i in range(len(p_ext)):
         traj.append(Point3D(p_ext[i].x,p_ext[i].y,z_cur,False))
         traj.append(Point3D(p_int[i].x,p_int[i].y,z_cur,True))
-        if i<len(p_ext)-1:
+        """if i<len(p_ext)-1:
             traj.append(Point3D(p_int[i+1].x,p_int[i+1].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))
         else:
-            traj.append(Point3D(p_int[0].x,p_int[0].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))
+            traj.append(Point3D(p_int[0].x,p_int[0].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))"""
         
     #board
     traj.append(Point3D(p_ext[0].x,p_ext[0].y,z_cur,False))
