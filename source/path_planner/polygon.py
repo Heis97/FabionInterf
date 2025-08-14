@@ -14,13 +14,15 @@ class Point3D(object):
     r:float = 0
     g:float = 0
     b:float = 0
-    def __init__(self,_x:float,_y:float,_z:float,_extrude:bool = True,_r:float = 0.0,_g:float = 1.,_b:float =1.):
+    k_e:float = 1
+    def __init__(self,_x:float,_y:float,_z:float,_extrude:bool = True,_r:float = 0.0,_g:float = 1.,_b:float =1.,_k_e:float =1.):
         self.x = _x
         self.y = _y
         self.z = _z
         self.r = _r
         self.g = _g
         self.b = _b
+        self.k_e = _k_e
         self.extrude = _extrude
 
     def normalyse(self):
@@ -76,7 +78,7 @@ class Point3D(object):
         return self
 
     def Clone(self):
-        return Point3D(self.x,self.y,self.z,self.extrude,self.r,self.g,self.b)
+        return Point3D(self.x,self.y,self.z,self.extrude,self.r,self.g,self.b,self.k)
 
     def __mul__(self, other):
         if(type(other)==Point3D):
@@ -98,6 +100,20 @@ class Point3D(object):
         if cos>=1: cos = 1
         elif cos <=-1: cos = -1
         return math.acos(cos)
+    
+    def rotate_z_ps(ps:"list[Point3D]",angle:float)->"list[float]":
+        if ps is None: return None
+        if len(ps) == 0: return None
+        ps_rot = []
+        for p in ps:
+            ps_rot.append(Point3D.rotate_z_p(p,angle))
+        return ps_rot
+    
+    def rotate_z_p(p:"Point3D",angle:float)->"list[float]":
+        if p is None: return None
+        x_r = p.x * math.cos(angle) - p.y * math.sin(angle)
+        y_r = p.x * math.sin(angle) + p.y * math.cos(angle)
+        return Point3D(x_r,y_r,p.z,p.extrude)
         
     def matrMul(self,matr:"list[list[float]]"):
 

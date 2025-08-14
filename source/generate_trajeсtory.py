@@ -253,38 +253,58 @@ def generate_traj_collag_3(z1:float,trajectory_settings:TrajectorySettings):
     
     return Point3D.add_offs(traj, trajectory_settings.start_xyz)
 
-def honeycomb_with_hole(trajectory_settings:TrajectorySettings,direction = -1)->list[Point3D]:
+def honeycomb_with_hole(trajectory_settings:TrajectorySettings)->list[Point3D]:
     z = float(trajectory_settings.dz)
     traj =[]
+    r = trajectory_settings.r_int
+    r_end = trajectory_settings.r_int_decr *r
+    dr = (r_end-r)/float(trajectory_settings.nz)
+    traj.append(Point3D(-trajectory_settings.d,1,z,False) )
+    traj.append(Point3D(-trajectory_settings.d,trajectory_settings.d,z,True) )
     for i in range(trajectory_settings.nz):
-        traj += one_layer_honeycomb_with_hole(trajectory_settings,z)
+        traj += one_layer_honeycomb_with_hole(trajectory_settings,z,r)
         z+=trajectory_settings.dz
+        r+=dr
 
     return traj
+
+def honeycomb_dep(trajectory_settings:TrajectorySettings)->list[Point3D]:
+    r = trajectory_settings.d*0.6
+    ps = gen_hexagon(r,trajectory_settings.dz*(trajectory_settings.nz-1))
+    ps = Point3D.rotate_z_ps(ps,0.6)
+    return ps
 
 def one_layer_honeycomb_with_hole(trajectory_settings:TrajectorySettings,z_cur,_rad_sm = 0.5)->list[Point3D]:
     rad = trajectory_settings.d
     rad_sm = _rad_sm
     p_int = gen_hexagon(rad_sm)
     p_ext = gen_hexagon(rad)
+
+    p_int = Point3D.rotate_z_ps(p_int,trajectory_settings.ang_int_r)
     traj = []
+    #int
     for i in range(len(p_ext)):
         traj.append(Point3D(p_ext[i].x,p_ext[i].y,z_cur,False))
         traj.append(Point3D(p_int[i].x,p_int[i].y,z_cur,True))
+        if i<len(p_ext)-1:
+            traj.append(Point3D(p_int[i+1].x,p_int[i+1].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))
+        else:
+            traj.append(Point3D(p_int[0].x,p_int[0].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))
         
+    #board
     traj.append(Point3D(p_ext[0].x,p_ext[0].y,z_cur,False))
     for i in range(1,len(p_ext)):
-        traj.append(Point3D(p_ext[i].x,p_ext[i].y,z_cur,True))
-    traj.append(Point3D(p_ext[0].x,p_ext[0].y,z_cur,True))
+        traj.append(Point3D(p_ext[i].x,p_ext[i].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))
+    traj.append(Point3D(p_ext[0].x,p_ext[0].y,z_cur,True,1,1,1,trajectory_settings.k_e_ext))
     return traj
 
-def gen_hexagon(rad_sm)->list[Point3D]:
-    p1 = Point3D(rad_sm*math.sin(math.pi/6),rad_sm*math.cos(math.pi/6),1)
-    p2 = Point3D(rad_sm,0,1)
-    p3 = Point3D(rad_sm*math.sin(math.pi/6),-rad_sm*math.cos(math.pi/6),1)
-    p4 = Point3D(-rad_sm*math.sin(math.pi/6),-rad_sm*math.cos(math.pi/6),1)
-    p5 = Point3D(-rad_sm,0,1)
-    p6 = Point3D(-rad_sm*math.sin(math.pi/6),rad_sm*math.cos(math.pi/6),1)
+def gen_hexagon(rad_sm,z:float = 0.0)->list[Point3D]:
+    p1 = Point3D(rad_sm*math.sin(math.pi/6),rad_sm*math.cos(math.pi/6),z)
+    p2 = Point3D(rad_sm,0,z)
+    p3 = Point3D(rad_sm*math.sin(math.pi/6),-rad_sm*math.cos(math.pi/6),z)
+    p4 = Point3D(-rad_sm*math.sin(math.pi/6),-rad_sm*math.cos(math.pi/6),z)
+    p5 = Point3D(-rad_sm,0,z)
+    p6 = Point3D(-rad_sm*math.sin(math.pi/6),rad_sm*math.cos(math.pi/6),z)
     return [p1,p2,p3,p4,p5,p6]
 
 
@@ -416,7 +436,7 @@ def generate_file_def(tr: "list[GCodeFrame]"):
     f1.close()
 
 
-def generate_traj_Fabion2(tr: list, print_settings:PrintSettings)->str:
+def generate_traj_Fabion2(tr: "list[Point3D]", print_settings:PrintSettings)->str:
     code = ";Fabion"
     name: str = print_settings.name
     Flow: float = print_settings.F 
@@ -450,15 +470,15 @@ def generate_traj_Fabion2(tr: list, print_settings:PrintSettings)->str:
         z = tr[i].z
         if(i==0):
             code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F_tr,5))+'\n')
-            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+ ' F'+str(round(F_tr,5))+  '\n')
-            code +=('G1 E1\n')
+            code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+0.5,4))+ ' F'+str(round(F_tr,5))+  '\n')
+            code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(startE,5))+'\n')
             code +=('G92 E0\n')
         else:
             x_ = tr[i-1].x
             y_ = tr[i-1].y
             z_ = tr[i-1].z
             rasst = math.sqrt((x - x_)**2+(y - y_)**2+(z - z_)**2)
-            v = diam*dz*rasst
+            v = diam*dz*rasst*tr[i].k_e
             v_all+=v
             if tr[i].extrude is True:
                 code +=('G1 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F,5))+ ' E'+str(round(v,5))+'\n')
@@ -466,8 +486,8 @@ def generate_traj_Fabion2(tr: list, print_settings:PrintSettings)->str:
                 code +=('G0 X'+str(round(x,5))+' Y'+str(round(y,5))+cur_z+str(round(z,5))+ ' F'+str(round(F_tr,5))+'\n')
     code +=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ ' F'+str(round(F_tr,5))+  '\n')
 
-    vol_cm3 = 0.058*(v_all-startE)
-    code +=(";Volume: "+str(round(vol_cm3,4))+"cm3"+'\n')    
+    vol_cm3 = v_all-startE
+    code +=(";Volume: "+str(round(vol_cm3,4))+"mcl"+'\n')    
 
     f1=open(name,'w')
     f1.write(code)
@@ -533,7 +553,54 @@ def generate_traj_Fabion(tr: list, print_settings:PrintSettings)->str:
     f1.close() 
     return code
 
+def generate_file_sph_Fanion2(tr: "list[Point3D]",  print_settings:PrintSettings)->str:
 
+    
+    code =""
+    F = print_settings.F*60
+    cur_z= ' Z'
+    safe_z = 50
+    safe_z_intern = 5
+    if print_settings.ndoz==1:
+        cur_z = ' A'
+    elif print_settings.ndoz==2:
+        cur_z = ' B'
+
+    code+=(';'+print_settings.name+
+    ' F'+str(round(F,4))+
+    '\n; diam'+str(round(print_settings.diam,4))+
+    '\n; dz'+str(round(print_settings.dz,4))+
+    '\n; ndoz'+str(round(print_settings.ndoz,4))+
+    '\n; startE'+str(round(print_settings.startE,4))+'\n')
+    code+=('T'+str(int(print_settings.ndoz))+'\n')
+    code+=('G92 E0\n')
+    code+=('M302 S0\n')
+    code+=('G90\n')
+    v_all = print_settings.startE
+    for i in range(len(tr)):
+        x = tr[i].x
+        y = tr[i].y
+        z = tr[i].z
+        if i == 0:
+            code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+' F600.0\n')
+            code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  '\n')
+        
+            
+        code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+'\n')
+        code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z,4))+'\n')
+
+        rasst = print_settings.dz
+        v = print_settings.v_vn
+        v_all+=v
+
+        code+=('G1' +cur_z+str(round(z+0.5,4))+' E'+str(round(v,4))+ ' \n')
+        code+=('G0' +cur_z +str(round(z+print_settings.dz,4))+ ' F50.0 \n')
+        code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z_intern,4))+  ' F'+str(round(F,4))+'\n')
+
+    code+=('G0 X'+str(round(x,4))+' Y'+str(round(y,4))+cur_z+str(round(z+safe_z,4))+ '\n')
+    vol_cm3 = v_all-print_settings.startE
+    code +=(";Volume: "+str(round(vol_cm3,4))+"mcl"+'\n')  
+    return code
 
 
 def generate_file_sph(tr: list, name: str, F: float, diam: float, dz: float, ndoz: int,startE:float)->str:

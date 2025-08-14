@@ -115,110 +115,168 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.but_convert_code.clicked.connect(self.gen_mesh_axol_cust)
 
 
+        dx1_lin = -30
+        
+        dx1_lin_dim = -50
+        dx1_lab =dx1_lin +dx1_lin_dim
 
+        dimx_lab = 40
         self.lin_nx = QtWidgets.QLineEdit(self)
-        self.lin_nx.setGeometry(QtCore.QRect(30, 70, 120, 20))#nx
+        self.lin_nx.setGeometry(QtCore.QRect(30+dx1_lin, 70, 120+dx1_lin_dim, 20))#nx
         self.lin_nx.setText('10')
 
         self.lin_ny = QtWidgets.QLineEdit(self)
-        self.lin_ny.setGeometry(QtCore.QRect(30, 100, 120, 20))#ny
+        self.lin_ny.setGeometry(QtCore.QRect(30+dx1_lin, 100, 120+dx1_lin_dim, 20))#ny
         self.lin_ny.setText('10')
 
         self.lin_d = QtWidgets.QLineEdit(self)
-        self.lin_d.setGeometry(QtCore.QRect(30, 130, 120, 20))#d
+        self.lin_d.setGeometry(QtCore.QRect(30+dx1_lin, 130, 120+dx1_lin_dim, 20))#d
         self.lin_d.setText('3')
 
         self.lin_dz = QtWidgets.QLineEdit(self)
-        self.lin_dz.setGeometry(QtCore.QRect(30, 160, 120, 20))#dZ
+        self.lin_dz.setGeometry(QtCore.QRect(30+dx1_lin, 160, 120+dx1_lin_dim, 20))#dZ
         self.lin_dz.setText('0.4')
 
         self.lin_diam = QtWidgets.QLineEdit(self)
-        self.lin_diam.setGeometry(QtCore.QRect(30, 190, 120, 20))#diam
+        self.lin_diam.setGeometry(QtCore.QRect(30+dx1_lin, 190, 120+dx1_lin_dim, 20))#diam
         self.lin_diam.setText('0.6')
 
         self.lin_F = QtWidgets.QLineEdit(self)
-        self.lin_F.setGeometry(QtCore.QRect(30, 220, 120, 20))#F
+        self.lin_F.setGeometry(QtCore.QRect(30+dx1_lin, 220, 120+dx1_lin_dim, 20))#F
         self.lin_F.setText('1')
 
         self.lin_nz = QtWidgets.QLineEdit(self)
-        self.lin_nz.setGeometry(QtCore.QRect(30, 250, 120, 20))#nz
+        self.lin_nz.setGeometry(QtCore.QRect(30+dx1_lin, 250, 120+dx1_lin_dim, 20))#nz
         self.lin_nz.setText('1')
 
         self.lin_ndoz = QtWidgets.QLineEdit(self)
-        self.lin_ndoz.setGeometry(QtCore.QRect(30, 280, 120, 20))#ndoz
+        self.lin_ndoz.setGeometry(QtCore.QRect(30+dx1_lin, 280, 120+dx1_lin_dim, 20))#ndoz
         self.lin_ndoz.setText('1')
 
         self.lin_startx = QtWidgets.QLineEdit(self)
-        self.lin_startx.setGeometry(QtCore.QRect(30, 310, 40, 20))#startx
+        self.lin_startx.setGeometry(QtCore.QRect(30+dx1_lin, 310, 40, 20))#startx
         self.lin_startx.setText('0')#160
 
         self.lin_starty = QtWidgets.QLineEdit(self)
-        self.lin_starty.setGeometry(QtCore.QRect(70, 310, 40, 20))#starty
+        self.lin_starty.setGeometry(QtCore.QRect(70+dx1_lin, 310, 40, 20))#starty
         self.lin_starty.setText('0')#50
 
         self.lin_startz = QtWidgets.QLineEdit(self)
-        self.lin_startz.setGeometry(QtCore.QRect(110, 310, 40, 20))#startz
+        self.lin_startz.setGeometry(QtCore.QRect(110+dx1_lin, 310, 40, 20))#startz
         self.lin_startz.setText('0')
 
         self.lin_startE = QtWidgets.QLineEdit(self)
-        self.lin_startE.setGeometry(QtCore.QRect(30, 340, 120, 20))#starE
+        self.lin_startE.setGeometry(QtCore.QRect(30+dx1_lin, 340, 120+dx1_lin_dim, 20))#starE
         self.lin_startE.setText('0')
 
         self.lin_diam_syr = QtWidgets.QLineEdit(self)
-        self.lin_diam_syr.setGeometry(QtCore.QRect(30, 370, 120, 20))#diam_syr
+        self.lin_diam_syr.setGeometry(QtCore.QRect(30+dx1_lin, 370, 120+dx1_lin_dim, 20))#diam_syr
         self.lin_diam_syr.setText('12')
 
         self.lin_name = QtWidgets.QLineEdit(self)
-        self.lin_name.setGeometry(QtCore.QRect(30, 430, 300, 20))#name
+        self.lin_name.setGeometry(QtCore.QRect(30+dx1_lin, 430, 300, 20))#name
         self.lin_name.setText('g_new_mesh.txt')
+
+#--------------------------------------------------
+        
+        self.lin_r_int = QtWidgets.QLineEdit(self)
+        self.lin_r_int.setGeometry(QtCore.QRect(30+80, 70, 120+dx1_lin_dim, 20))#R_int
+        self.lin_r_int.setText('0.5')
+
+        self.label_nx = QtWidgets.QLabel('R_int',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 70, dimx_lab, 20))
+
+        self.lin_r_int_decr = QtWidgets.QLineEdit(self)
+        self.lin_r_int_decr.setGeometry(QtCore.QRect(30+80, 100, 120+dx1_lin_dim, 20))#R_int_decr
+        self.lin_r_int_decr.setText('0.5')
+
+        self.label_nx = QtWidgets.QLabel('R_int_decr',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 100, dimx_lab, 20))
+        
+
+        self.lin_k_e_ext = QtWidgets.QLineEdit(self)
+        self.lin_k_e_ext.setGeometry(QtCore.QRect(30+80, 130, 120+dx1_lin_dim, 20))#k_e_ext
+        self.lin_k_e_ext.setText('0.6')
+
+        self.label_nx = QtWidgets.QLabel('k_e_ext',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 130, dimx_lab, 20))
+
+        self.lin_retr = QtWidgets.QLineEdit(self)
+        self.lin_retr.setGeometry(QtCore.QRect(30+80, 160, 120+dx1_lin_dim, 20))#etr
+        self.lin_retr.setText('1')
+
+        self.label_nx = QtWidgets.QLabel('retr',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 160, dimx_lab, 20))
+
+        self.lin_ang_int_r = QtWidgets.QLineEdit(self)
+        self.lin_ang_int_r.setGeometry(QtCore.QRect(30+80, 190, 120+dx1_lin_dim, 20))#ang_int_r
+        self.lin_ang_int_r.setText('0.1')
+
+        self.label_nx = QtWidgets.QLabel('ang_int_r',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 190, dimx_lab, 20))
+
+        self.lin_ndoz_vn = QtWidgets.QLineEdit(self)
+        self.lin_ndoz_vn.setGeometry(QtCore.QRect(30+80, 220, 120+dx1_lin_dim, 20))#ndoz_vn
+        self.lin_ndoz_vn.setText('2')
+
+        self.label_nx = QtWidgets.QLabel('ndoz_vn',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 220, dimx_lab, 20))
+
+        self.lin_v_vn = QtWidgets.QLineEdit(self)
+        self.lin_v_vn.setGeometry(QtCore.QRect(30+80, 250, 120+dx1_lin_dim, 20))#v_vn
+        self.lin_v_vn.setText('5')
+
+        self.label_nx = QtWidgets.QLabel('v_vn',self)
+        self.label_nx.setGeometry(QtCore.QRect(160+30, 250, dimx_lab, 20))
+        
         
         #----------------------------------------------
 
         self.label_nx = QtWidgets.QLabel('Nx',self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 70, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 70, dimx_lab, 20))
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 100, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 100, dimx_lab, 20))
         self.label_nx.setText('Ny')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 130, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 130, dimx_lab, 20))
         self.label_nx.setText('a')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 160, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 160, dimx_lab, 20))
         self.label_nx.setText('dz')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 190, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 190, dimx_lab, 20))
         self.label_nx.setText('diam')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 220, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 220, dimx_lab, 20))
         self.label_nx.setText('F')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 250, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 250, dimx_lab, 20))
         self.label_nx.setText('nz')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 280, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 280, dimx_lab, 20))
         self.label_nx.setText('ndoz')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 310, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160, 310, dimx_lab, 20))
         self.label_nx.setText('startxyz')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 340, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 340, dimx_lab, 20))
         self.label_nx.setText('startE')
 
         self.label_nx = QtWidgets.QLabel(self)
-        self.label_nx.setGeometry(QtCore.QRect(160, 370, 60, 20))
+        self.label_nx.setGeometry(QtCore.QRect(160+dx1_lab, 370, dimx_lab, 20))
         self.label_nx.setText('Diam_syr')
 
         self.label_name = QtWidgets.QLabel(self)
-        self.label_name.setGeometry(QtCore.QRect(160, 405, 60, 20))
+        self.label_name.setGeometry(QtCore.QRect(160+dx1_lab, 405, dimx_lab, 20))
         self.label_name.setText('Name')
 
         self.box_g_code = QtWidgets.QTextEdit(self)
@@ -265,9 +323,15 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         
     def gen_honeycomb(self):
         print("gen_mesh")
+        self.prog_code = ""
         print_settings, trajectory_settings = self.setSettings()
         self.koord_1 = honeycomb_with_hole(trajectory_settings)
         gcode = generate_traj_Fabion2(self.koord_1, print_settings)
+        self.prog_code+=gcode
+
+        self.koord_1 = honeycomb_dep(trajectory_settings)
+        print_settings.ndoz = float(self.lin_ndoz_vn.text())
+        gcode = generate_file_sph_Fanion2(self.koord_1, print_settings)
         self.prog_code+=gcode
         #self.clear_mesh_2()
         self.addToViewerTraj(parse_g_code(self.prog_code))  
@@ -281,7 +345,8 @@ class Fabion_mesh_app(QtWidgets.QWidget):
                 float(self.lin_dz.text()),
                 float(self.lin_ndoz.text()),
                 float(self.lin_startE.text()),
-                float(self.lin_diam_syr.text()))
+                float(self.lin_diam_syr.text()),
+                float(self.lin_v_vn.text()))
         trajectory_settings = TrajectorySettings(
                 int(self.lin_nx.text()),
                 int(self.lin_ny.text()),
@@ -292,7 +357,12 @@ class Fabion_mesh_app(QtWidgets.QWidget):
                     float(self.lin_startx.text()),
                     float(self.lin_starty.text()),
                     float(self.lin_startz.text())
-                    ))
+                    ),
+                float(self.lin_r_int.text()),
+                float(self.lin_r_int_decr.text()),
+                float(self.lin_k_e_ext.text()),
+                float(self.lin_retr.text()),
+                float(self.lin_ang_int_r.text()))
         
         return print_settings, trajectory_settings    
 
