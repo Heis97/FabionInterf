@@ -114,6 +114,10 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.but_convert_code.setGeometry(QtCore.QRect(720, 620, 150, 40))
         self.but_convert_code.clicked.connect(self.gen_mesh_axol_cust)
 
+        self.but_convert_code = QtWidgets.QPushButton('Показать траект', self)
+        self.but_convert_code.setGeometry(QtCore.QRect(720, 670, 150, 40))
+        self.but_convert_code.clicked.connect(self.show_traj)
+
 
         dx1_lin = -30
         
@@ -403,6 +407,9 @@ class Fabion_mesh_app(QtWidgets.QWidget):
         self.prog_code+=gcode
         self.addToViewerTraj(parse_g_code(self.prog_code))
         self.gen_file()
+
+    def show_traj(self):
+        self.addToViewerTraj(parse_g_code(self.box_g_code.toPlainText()))
         
     def gen_layer(self):
         #try:
@@ -458,7 +465,7 @@ class Fabion_mesh_app(QtWidgets.QWidget):
 
     def addToViewerTraj(self,traj:"list[Point3D]"):    
         self.box_g_code.setText(self.prog_code)
-        self.viewer3d.addLines(traj, 1.0, 0.5, 0.5, 1.)
+        self.viewer3d.addLines(traj, 1.0, 0.5, 0.5, 0.2)#s 1.
 
     def addToViewerCont(self,traj:"list[Point3D]"):    
         self.viewer3d.addLinesDef(traj, 1.0, 0.5, 0.5, 1.)
